@@ -1,0 +1,88 @@
+{
+  "name": "deflow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev -p 8787",
+    "build": "next build",
+    "start": "next start -p 8787"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.2.6",
+    "@oceanprotocol/lib": "^3.4.1",
+    "@reduxjs/toolkit": "^2.0.1",
+    "@truffle/hdwallet-provider": "^2.1.15",
+    "@web3-onboard/coinbase": "^2.2.7",
+    "@web3-onboard/core": "^2.21.6",
+    "@web3-onboard/gnosis": "^2.2.2",
+    "@web3-onboard/injected-wallets": "^2.10.16",
+    "@web3-onboard/ledger": "^2.6.0",
+    "@web3-onboard/react": "^2.8.17",
+    "@web3-onboard/trezor": "^2.4.4",
+    "@web3-onboard/trust": "^2.0.4",
+    "@web3-onboard/walletconnect": "^2.5.5",
+    "@xyflow/react": "^12.3.2",
+    "antd": "^5.19.0",
+    "chain-registry": "^1.46.4",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.4.5",
+    "ethers": "^5.7.2",
+    "moment": "^2.29.4",
+    "mongoose": "^8.3.4",
+    "next": "14.0.2",
+    "nprogress": "^0.2.0",
+    "react": "18.2.0",
+    "react-countup": "^6.4.2",
+    "react-dom": "18.2.0",
+    "react-icons": "^4.10.1",
+    "react-redux": "^9.0.4",
+    "recharts": "^2.12.2",
+    "websocket": "^1.0.35"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.2",
+    "postcss": "^8",
+    "typescript": "^5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a2nfinance/deflow.git"
+  },
+  "keywords": [
+    "a2n",
+    "deflow",
+    "AI",
+    "ocean"
+  ],
+  "author": "a2n.finance",
+  "license": "BSL",
+  "bugs": {
+    "url": "https://github.com/a2nfinance/deflow/issues"
+  },
+  "homepage": "https://github.com/a2nfinance/deflow#readme",
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browser": {
+    "fs": false,
+    "path": false
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
