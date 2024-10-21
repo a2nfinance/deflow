@@ -77,14 +77,14 @@ export async function start(nodeUrl: string, args: any[]) {
 			await commands.start()
 			break
 		case "getDDO":
-			await commands.getDDO(args);
-			break;
+			let ddo = await commands.getDDO(args);
+			return ddo;
 		case "publish":
-			await commands.publish(args);
-			break;
+			let publishedDataset = await commands.publish(args);
+			return publishedDataset;
 		case "publishAlgo":
-			await commands.publishAlgo(args);
-			break;
+			let publishedAlgo = await commands.publishAlgo(args);
+			return publishedAlgo;
 		case "edit":
 			await commands.editAsset(args);
 			break;
@@ -104,8 +104,8 @@ export async function start(nodeUrl: string, args: any[]) {
 			await commands.computeStop(args);
 			break;
 		case "getJobStatus":
-			await commands.getJobStatus(args);
-			break;
+			let jobStatus = await commands.getJobStatus(args);
+			return jobStatus;
 		case "downloadJobResults":
 			await commands.downloadJobResults(args);
 			break;

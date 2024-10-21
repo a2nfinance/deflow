@@ -25,7 +25,7 @@ class CustomProvider extends Provider {
     providerUri: string,
     consumer: Signer,
     computeEnv: string,
-    dataset: ComputeAsset,
+    datasets: ComputeAsset[],
     algorithm: CustomComputeAlgorithm,
     signal?: AbortSignal,
     additionalDatasets?: ComputeAsset[],
@@ -57,7 +57,7 @@ class CustomProvider extends Provider {
     ).toString()
 
     let signatureMessage = consumerAddress
-    signatureMessage += dataset.documentId
+    signatureMessage += datasets.map(dataset => dataset.documentId).join(",");
     signatureMessage += nonce
     const signature = await super.signProviderRequest(consumer, signatureMessage)
     const payload = Object()
@@ -65,7 +65,7 @@ class CustomProvider extends Provider {
     payload.signature = signature
     payload.nonce = nonce
     payload.environment = computeEnv
-    payload.datasets = [dataset]
+    payload.datasets = datasets
     payload.algorithm = algorithm
     if (additionalDatasets) payload.additionalDatasets = additionalDatasets
     if (output) payload.output = output

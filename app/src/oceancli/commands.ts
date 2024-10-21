@@ -1,18 +1,6 @@
-import fs from "fs";
-import os from "os";
-import util from "util";
-import {
-	createAsset,
-	handleComputeOrder,
-	updateAssetMetadata,
-	downloadFile,
-	isOrderable,
-	getMetadataURI,
-} from "./helpers";
 import {
 	Aquarius,
 	Asset,
-	ComputeAlgorithm,
 	ComputeJob,
 	ComputeOutput,
 	Config,
@@ -22,15 +10,25 @@ import {
 	amountToUnits,
 	getHash,
 	orderAsset,
-	sendTx,
+	sendTx
 } from "@oceanprotocol/lib";
+import fs from "fs";
+import util from "util";
+import {
+	createAsset,
+	downloadFile,
+	getMetadataURI,
+	handleComputeOrder,
+	isOrderable,
+	updateAssetMetadata,
+} from "./helpers";
 
-import {CustomProviderInstance} from "./CustomProvider";
+import { CustomProviderInstance } from "./CustomProvider";
 
 import { Signer, ethers } from "ethers";
+import { CustomComputeAlgorithm, CustomComputeAsset } from "./extendtypes";
 import { interactiveFlow } from "./interactiveFlow";
 import { publishAsset } from "./publishAsset";
-import { CustomComputeAlgorithm, CustomComputeAsset } from "./extendtypes";
 
 export class Commands {
 	public signer: Signer;
@@ -56,7 +54,7 @@ export class Commands {
 		console.log('Starting the interactive CLI flow...\n\n');
 		const data = await interactiveFlow(this.providerUrl); // Collect data via CLI
 		await publishAsset(data, this.signer, this.config); // Publish asset with collected data
-	  }
+	}
 
 	// utils
 	public async sleep(ms: number) {
@@ -93,39 +91,48 @@ export class Commands {
 				encryptDDO
 			);
 			console.log("Asset published. ID:  " + urlAssetId);
+			return { success: true, assetId: urlAssetId }
 		} catch (e) {
-			console.error("Error when publishing dataset from file: " + args[1]);
-			console.error(e);
-			return;
+			console.log("Error when publishing dataset from file: " + args[1]);
+			console.log(e);
+			return { success: false, message: e.message() }
 		}
 	}
 
 	public async publishAlgo(args: any[]) {
-		let algoAsset;
 		try {
-			algoAsset = args[1];
+			let algoAsset;
+			try {
+				algoAsset = args[1];
+			} catch (e) {
+				console.error("Cannot read metadata from " + args[1]);
+				console.error(e);
+				return;
+			}
+			const encryptDDO = args[2] === "false" ? false : true;
+			// add some more checks
+			const algoDid = await createAsset(
+				algoAsset.nft.name,
+				algoAsset.nft.symbol,
+				this.signer,
+				algoAsset.services[0].files,
+				algoAsset,
+				this.providerUrl,
+				this.config,
+				this.aquarius,
+				1,
+				this.macOsProviderUrl,
+				encryptDDO
+			);
+			// add some more checks
+			console.log("Algorithm published. DID:  " + algoDid);
+			return { success: true, assetId: algoDid }
 		} catch (e) {
-			console.error("Cannot read metadata from " + args[1]);
+			console.error("Error when publishing algo: " + args[1]);
 			console.error(e);
-			return;
+			return { success: false, message: e.message() }
 		}
-		const encryptDDO = args[2] === "false" ? false : true;
-		// add some more checks
-		const algoDid = await createAsset(
-			algoAsset.nft.name,
-			algoAsset.nft.symbol,
-			this.signer,
-			algoAsset.services[0].files,
-			algoAsset,
-			this.providerUrl,
-			this.config,
-			this.aquarius,
-			1,
-			this.macOsProviderUrl,
-			encryptDDO
-		);
-		// add some more checks
-		console.log("Algorithm published. DID:  " + algoDid);
+
 	}
 
 	public async editAsset(args: string[]) {
@@ -167,12 +174,16 @@ export class Commands {
 		console.log("Resolving Asset with DID: " + args[1]);
 		const resolvedDDO = await this.aquarius.waitForAqua(args[1]);
 		if (!resolvedDDO) {
-			console.error(
+			console.log(
 				"Error fetching Asset with DID: " +
-					args[1] +
-					".  Does this asset exists?"
+				args[1] +
+				".  Does this asset exists?"
 			);
+			return {success: false, message: "Error fetching Asset with DID: " +
+				args[1] +
+				".  Does this asset exists?"}
 		} else console.log(util.inspect(resolvedDDO, false, null, true));
+		return {success: true, resolvedDDO: resolvedDDO}
 	}
 
 	public async download(args: string[]) {
@@ -298,14 +309,14 @@ export class Commands {
 				}
 			}
 		}
-		
+
 		const algo: CustomComputeAlgorithm = {
 			fileObject: algoDdo.services[0].files.files[0],
 			documentId: algoDdo.id,
 			serviceId: algoDdo.services[0].id,
 			meta: algoDdo.metadata.algorithm
 		};
-	
+
 		const assets: CustomComputeAsset[] = [];
 		for (const dataDdo in ddos) {
 			const canStartCompute = isOrderable(
@@ -342,9 +353,9 @@ export class Commands {
 		) {
 			console.error(
 				"Error initializing Provider for the compute job using dataset DID " +
-					args[1] +
-					" and algorithm DID " +
-					args[2]
+				args[1] +
+				" and algorithm DID " +
+				args[2]
 			);
 			return;
 		}
@@ -364,8 +375,8 @@ export class Commands {
 		if (!algo.transferTxId) {
 			console.error(
 				"Error ordering compute for algorithm with DID: " +
-					args[2] +
-					".  Do you have enough tokens?"
+				args[2] +
+				".  Do you have enough tokens?"
 			);
 			return;
 		}
@@ -385,8 +396,8 @@ export class Commands {
 			if (!assets[i].transferTxId) {
 				console.error(
 					"Error ordering dataset with DID: " +
-						assets[i] +
-						".  Do you have enough tokens?"
+					assets[i] +
+					".  Do you have enough tokens?"
 				);
 				return;
 			}
@@ -395,12 +406,12 @@ export class Commands {
 		const additionalDatasets = assets.length > 1 ? assets.slice(1) : null;
 		console.log(
 			"Starting compute job on " +
-				assets[0].documentId +
-				" with additional datasets:" +
-				(!additionalDatasets ? "none" : additionalDatasets[0].documentId)
+			assets[0].documentId +
+			" with additional datasets:" +
+			(!additionalDatasets ? "none" : additionalDatasets[0].documentId)
 		);
 
-		const output: ComputeOutput =  {
+		const output: ComputeOutput = {
 			metadataUri: await getMetadataURI()
 		}
 
@@ -408,7 +419,7 @@ export class Commands {
 			providerURI,
 			this.signer,
 			computeEnv.id,
-			assets[0],
+			assets,
 			algo,
 			undefined,
 			//@ts-ignore
@@ -438,7 +449,7 @@ export class Commands {
 
 		const jobId = args[2]
 		let agreementId = "";
-		if(hasAgreementId) {
+		if (hasAgreementId) {
 			agreementId = args[3];
 		}
 
@@ -477,8 +488,8 @@ export class Commands {
 		if (asset.services[0].type !== "compute") {
 			console.error(
 				"Error getting computeService for " +
-					args[1] +
-					".  Does this asset has an computeService?"
+				args[1] +
+				".  Does this asset has an computeService?"
 			);
 			return;
 		}
@@ -545,8 +556,8 @@ export class Commands {
 		if (asset.services[0].type !== "compute") {
 			console.error(
 				"Error getting computeService for " +
-					args[1] +
-					".  Does this asset has an computeService?"
+				args[1] +
+				".  Does this asset has an computeService?"
 			);
 			return;
 		}
@@ -570,9 +581,9 @@ export class Commands {
 		} else {
 			console.error(
 				" " +
-					args[2] +
-					".  is not allowed by the publisher to run on " +
-					args[1]
+				args[2] +
+				".  is not allowed by the publisher to run on " +
+				args[1]
 			);
 			return;
 		}
@@ -593,7 +604,7 @@ export class Commands {
 		// args[2] - jobId
 		// args[3] - agreementId
 		const hasAgreementId = args.length === 4;
-		
+
 		const dataDdo = await this.aquarius.waitForAqua(args[1]);
 		if (!dataDdo) {
 			console.error(
@@ -603,7 +614,7 @@ export class Commands {
 		}
 		const jobId = args[2]
 		let agreementId = "";
-		if(hasAgreementId) {
+		if (hasAgreementId) {
 			agreementId = args[3];
 		}
 		const providerURI =
@@ -618,10 +629,11 @@ export class Commands {
 			agreementId
 		)) as ComputeJob;
 		console.log(util.inspect(jobStatus, false, null, true));
+		return jobStatus;
 	}
 
 	public async downloadJobResults(args: string[]) {
-	
+
 		const jobResult = await ProviderInstance.getComputeResultUrl(
 			this.providerUrl,
 			this.signer,
