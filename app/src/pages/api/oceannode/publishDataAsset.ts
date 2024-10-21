@@ -22,10 +22,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                         name: name
                     },
                 }
-                ddo.services[0].files.files[0].url = assetUrl;
+                ddo.services[0].fileObject.url = assetUrl;
                 ddo.services[0].serviceEndpoint = nodeUrl;
                 ddo.services[0].compute.publisherTrustedAlgorithms = publisherTrustedAlgorithms?.length ? publisherTrustedAlgorithms : [];
-               
                 // Create a Job here
                 let job = new Job({
                     owner: owner,
