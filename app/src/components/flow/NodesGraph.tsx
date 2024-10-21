@@ -16,6 +16,8 @@ import {
 import '@xyflow/react/dist/style.css';
 import { Button, Card, Col, Divider, Form, Input, Row, Steps } from 'antd';
 import { useCallback, useRef, useState } from 'react';
+import { InputNodeForm } from "./InputNodeForm";
+import { MiddleAndOutputForm } from "./MiddleAndOutputForm";
 
 const initialXY = 0;
 
@@ -155,51 +157,9 @@ export const NodesGraph = () => {
   const nodeFormComponent = (node) => {
     if (node)
       if (node.type === "input") {
-        return <Form name={`form-${node.id}`} layout="vertical" onFinish={onFinish} initialValues={{
-          "label": node.data.label,
-          "ocean_node_address": node.data.ocean_node_address,
-          "ddo_ids": node.data.ddo_ids,
-        }}>
-          <Form.Item name={`label_${node.id}`} label="Label">
-            <Input size="large" placeholder="Label" />
-          </Form.Item>
-          <Form.Item name={`ocean_node_address_${node.id}`} label="Ocean Node Address">
-            <Input size="large" placeholder="Ocean Node Address" />
-          </Form.Item>
-          <Form.Item name={`algorithm_ddo_id_${node.id}`} label="Algorithm DDO ID">
-            <Input size="large" placeholder="Algorithm DDO ID" />
-          </Form.Item>
-          <Form.Item name={`asset_ddo_id_${node.id}`} label="Asset DDO ID">
-            <Input size="large" placeholder="Asset DDO id" />
-          </Form.Item>
-          <Form.Item name={`compute_env_${node.id}`} label="Compute ENV">
-            <Input size="large" placeholder="Compute environment" />
-          </Form.Item>
-          <Form.Item>
-            <Button size="large" block type="primary" htmlType="submit">Update</Button>
-          </Form.Item>
-        </Form>
+        return <InputNodeForm onFinish={onFinish} node={node}/>
       } else {
-        return <Form layout="vertical" onFinish={onFinish} initialValues={{
-          "label": node.data.label,
-          "ocean_node_address": node.data.ocean_node_address
-        }}>
-          <Form.Item name={`label_${node.id}`} label="Label">
-            <Input size="large" placeholder="Label" />
-          </Form.Item>
-          <Form.Item name={`ocean_node_address_${node.id}`} label="Ocean Node Address">
-            <Input size="large" placeholder="Ocean Node Address" />
-          </Form.Item>
-          <Form.Item name={`algorithm_ddo_id_${node.id}`} label="Algorithm DDO ID">
-            <Input size="large" placeholder="Algorithm DDO ID" />
-          </Form.Item>
-          <Form.Item name={`compute_env_${node.id}`} label="Compute ENV">
-            <Input size="large" placeholder="Compute environment" />
-          </Form.Item>
-          <Form.Item>
-            <Button size="large" block type="primary" htmlType="submit">Update</Button>
-          </Form.Item>
-        </Form>
+        return <MiddleAndOutputForm onFinish={onFinish} node={node} />
       }
   }
 
