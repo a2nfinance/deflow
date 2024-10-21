@@ -80,11 +80,11 @@ export async function start(nodeUrl: string, args: any[]) {
 			let ddo = await commands.getDDO(args);
 			return ddo;
 		case "publish":
-			let publishedDataset = await commands.publish(args);
-			return publishedDataset;
+			let publishResult = await commands.publish(args);
+			return publishResult;
 		case "publishAlgo":
-			let publishedAlgo = await commands.publishAlgo(args);
-			return publishedAlgo;
+			let algoResult = await commands.publishAlgo(args);
+			return algoResult;
 		case "edit":
 			await commands.editAsset(args);
 			break;
@@ -98,8 +98,8 @@ export async function start(nodeUrl: string, args: any[]) {
 			await commands.disallowAlgo(args);
 			break;
 		case "startCompute":
-			await commands.computeStart(args);
-			break;
+			let computeResult = await commands.computeStart(args);
+			return computeResult;
 		case "stopCompute":
 			await commands.computeStop(args);
 			break;

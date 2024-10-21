@@ -29,6 +29,7 @@ import { Signer, ethers } from "ethers";
 import { CustomComputeAlgorithm, CustomComputeAsset } from "./extendtypes";
 import { interactiveFlow } from "./interactiveFlow";
 import { publishAsset } from "./publishAsset";
+import { message } from "antd";
 
 export class Commands {
 	public signer: Signer;
@@ -70,9 +71,9 @@ export class Commands {
 		try {
 			asset = args[1];
 		} catch (e) {
-			console.error("Cannot read metadata from " + args[1]);
-			console.error(e);
-			return;
+			console.log("Cannot read metadata from " + args[1]);
+			console.log(e);
+			return { success: false, message: e.message }
 		}
 		const encryptDDO = args[2] === "false" ? false : true;
 		try {
@@ -93,9 +94,9 @@ export class Commands {
 			console.log("Asset published. ID:  " + urlAssetId);
 			return { success: true, assetId: urlAssetId }
 		} catch (e) {
-			console.log("Error when publishing dataset from file: " + args[1]);
-			console.log(e);
-			return { success: false, message: e.message() }
+			console.log("Error when publishing dataset from file");
+			console.log(e.message);
+			return { success: false, message: e.message }
 		}
 	}
 
@@ -128,9 +129,9 @@ export class Commands {
 			console.log("Algorithm published. DID:  " + algoDid);
 			return { success: true, assetId: algoDid }
 		} catch (e) {
-			console.error("Error when publishing algo: " + args[1]);
+			console.error("Error when publishing algo");
 			console.error(e);
-			return { success: false, message: e.message() }
+			return { success: false, message: e.message }
 		}
 
 	}
@@ -258,16 +259,16 @@ export class Commands {
 		for (const dataset in inputDatasets) {
 			const dataDdo = await this.aquarius.waitForAqua(inputDatasets[dataset]);
 			if (!dataDdo) {
-				console.error(
+				console.log(
 					"Error fetching DDO " + dataset[1] + ".  Does this asset exists?"
 				);
-				return;
+				return {success: false, message: "Error fetching DDO " + dataset[1] + ".  Does this asset exists?"};
 			} else {
 				ddos.push(dataDdo);
 			}
 		}
 		if (ddos.length <= 0 || ddos.length != inputDatasets.length) {
-			console.error("Not all the data ddos are available.");
+			console.log("Not all the data ddos are available.");
 			return;
 		}
 		const providerURI =
@@ -277,10 +278,10 @@ export class Commands {
 
 		const algoDdo = await this.aquarius.waitForAqua(args[2]);
 		if (!algoDdo) {
-			console.error(
+			console.log(
 				"Error fetching DDO " + args[1] + ".  Does this asset exists?"
 			);
-			return;
+			return {success: false, message: "Error fetching DDO " + args[1] + ".  Does this asset exists?"};
 		}
 
 		const computeEnvs = await ProviderInstance.getComputeEnvironments(
@@ -311,7 +312,7 @@ export class Commands {
 		}
 
 		const algo: CustomComputeAlgorithm = {
-			fileObject: algoDdo.services[0].files.files[0],
+			fileObject: algoDdo.services[0].fileObject,
 			documentId: algoDdo.id,
 			serviceId: algoDdo.services[0].id,
 			meta: algoDdo.metadata.algorithm
@@ -326,13 +327,13 @@ export class Commands {
 				algoDdo
 			);
 			if (!canStartCompute) {
-				console.error(
+				console.log(
 					"Error Cannot start compute job using the datasets DIDs & algorithm DID provided"
 				);
-				return;
+				return {success: false, message: "Error Cannot start compute job using the datasets DIDs & algorithm DID provided"};
 			}
 			assets.push({
-				fileObject: ddos[dataDdo].services[0].files.files[0],
+				fileObject: ddos[dataDdo].services[0].fileObject,
 				documentId: ddos[dataDdo].id,
 				serviceId: ddos[dataDdo].services[0].id,
 			});
@@ -351,13 +352,17 @@ export class Commands {
 			!providerInitializeComputeJob ||
 			"error" in providerInitializeComputeJob.algorithm
 		) {
-			console.error(
+			console.log(
 				"Error initializing Provider for the compute job using dataset DID " +
 				args[1] +
 				" and algorithm DID " +
 				args[2]
 			);
-			return;
+
+			return {success: false, message: "Error initializing Provider for the compute job using dataset DID " +
+				args[1] +
+				" and algorithm DID " +
+				args[2] };
 		}
 
 		console.log("Ordering algorithm: ", args[2]);
@@ -373,12 +378,14 @@ export class Commands {
 			providerURI
 		);
 		if (!algo.transferTxId) {
-			console.error(
+			console.log(
 				"Error ordering compute for algorithm with DID: " +
 				args[2] +
 				".  Do you have enough tokens?"
 			);
-			return;
+			return {success: false, message: "Error ordering compute for algorithm with DID: " +
+				args[2] +
+				".  Do you have enough tokens?" };
 		}
 
 		for (let i = 0; i < ddos.length; i++) {
@@ -394,12 +401,14 @@ export class Commands {
 				providerURI
 			);
 			if (!assets[i].transferTxId) {
-				console.error(
+				console.log(
 					"Error ordering dataset with DID: " +
 					assets[i] +
 					".  Do you have enough tokens?"
 				);
-				return;
+				return {success: false, message: "Error ordering dataset with DID: " +
+					assets[i] +
+					".  Do you have enough tokens?" };
 			}
 		}
 
@@ -432,8 +441,14 @@ export class Commands {
 			console.log("Compute started.  JobID: " + jobId);
 			console.log("Agreement ID: " + agreementId);
 			console.log("Computed Jobs:", computeJobs[0]);
+			return {success: true, result: {
+				oceanNodeJobId: jobId,
+				agreementId: agreementId,
+				computedJob: computeJobs[0]
+			} };
 		} else {
 			console.log("Error while starting the compute job: ", computeJobs);
+			return {success: false, message: `Error while starting the compute job: ${computeJobs}`};
 		}
 	}
 

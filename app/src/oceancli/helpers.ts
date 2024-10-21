@@ -32,7 +32,8 @@ import {
 	Datatoken4 
 } from "@oceanprotocol/lib";
 import { hexlify } from "ethers/lib/utils";
-
+import dotenv from "dotenv";
+dotenv.config();
 export async function downloadFile(
 	url: string,
 	downloadPath: string,
@@ -43,11 +44,12 @@ export async function downloadFile(
 		throw new Error("Response error.");
 	}
 
-	const defaultName = !isNaN(index) && index > -1 ? `file_${index}.out` : 'file.out'
+	const defaultName = !isNaN(index!) && index! > -1 ? `file_${index}.out` : 'file.out'
 	let filename: string
 
 	try {
 		// try to get it from headers
+		// @ts-ignore
 		filename = response.headers
 			.get("content-disposition")
 			.match(/attachment;filename=(.+)/)[1];
@@ -80,7 +82,7 @@ export async function createAsset(
 	macOsProviderUrl?: string,
 	encryptDDO: boolean = true,
 ) {
-	const { chainId } = await owner.provider.getNetwork();
+	const { chainId } = await owner.provider!.getNetwork();
 	const nft = new Nft(owner, chainId);
 	const nftFactory = new NftFactory(config.nftFactoryAddress, owner);
 
@@ -249,7 +251,7 @@ export async function updateAssetMetadata(
 	macOsProviderUrl?: string,
 	encryptDDO: boolean = true
 ) {
-	const nft = new Nft(owner, (await owner.provider.getNetwork()).chainId);
+	const nft = new Nft(owner, (await owner.provider!.getNetwork()).chainId);
 	let flags;
 	let metadata;
 	const validateResult = await aquariusInstance.validate(updatedDdo);
@@ -408,12 +410,12 @@ export function isPrivateIP(ip): boolean {
 		console.error('Erro getting public IP: ',err.message)
 	}
 	
-    return null
+    return ""
  }
 
  export async function getMetadataURI() {
-	const metadataURI = process.env.AQUARIUS_URL
-	const parsed = new URL(metadataURI);
+	const metadataURI = process.env.NODE_URL || process.env.AQUARIUS_URL; 
+	const parsed = new URL(metadataURI!);
 	let ip = metadataURI // by default
 	// has port number?
 	const hasPort = parsed.port && !isNaN( Number(parsed.port))
