@@ -1,41 +1,36 @@
 import connect from '@/database/connect';
 import { NextApiRequest, NextApiResponse } from 'next';
 import simpleComputeDataset from "@/oceancli/metadata/simpleComputeDataset.json";
-import { assetQueue } from '@/queue';
+import { assetQueue, startComputeQueue } from '@/queue';
 import Job, {JOB_STATES, JOB_TYPES} from '@/database/models/job';
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // need to validate
         const {
             owner,
+            experimentId,
+            runId,
+            graphNodeId,
             nodeUrl,
-            assetUrl,
-            name,
-            publisherTrustedAlgorithms
+            datasets,
+            algo,
+            computeEnvId
         } = req.body;
-        if (owner && nodeUrl && assetUrl && name) {
+        if (owner && nodeUrl && datasets && algo && computeEnvId) {
             try {
-                let ddo = {
-                    ...simpleComputeDataset,
-                    metadata: {
-                        ...simpleComputeDataset.metadata,
-                        name: name
-                    },
-                }
-                ddo.services[0].files.files[0].url = assetUrl;
-                ddo.services[0].serviceEndpoint = nodeUrl;
-                ddo.services[0].compute.publisherTrustedAlgorithms = publisherTrustedAlgorithms?.length ? publisherTrustedAlgorithms : [];
-               
                 // Create a Job here
                 let job = new Job({
                     owner: owner,
+                    experiment_id: experimentId,
+                    run_id: runId,
+                    graph_node_id: graphNodeId,
                     ocean_node_url: nodeUrl,
-                    job_type: JOB_TYPES.PUBLISH_ASSET,
+                    job_type: JOB_TYPES.PUBLISH_COMPUTE,
                     state: JOB_STATES.PROCESSING
                 });
                 let saveJob = await job.save();
-                let data = {nodeUrl, args: ["publish", ddo, false], jobId: saveJob._id};
-                assetQueue.add(data);
+                let data = {nodeUrl, args: ["computeStart", datasets, algo, computeEnvId], jobId: saveJob._id};
+                startComputeQueue.add(data);
                 return res.status(200).send({success: true, jobId: saveJob._id});
             } catch (error) {
                 console.log(error)
