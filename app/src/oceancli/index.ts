@@ -107,8 +107,8 @@ export async function start(nodeUrl: string, args: any[]) {
 			let jobStatus = await commands.getJobStatus(args);
 			return jobStatus;
 		case "downloadJobResults":
-			await commands.downloadJobResults(args);
-			break;
+			let downloadResult = await commands.downloadJobResults(args);
+			return downloadResult;
 		case "mintOcean":
 			await commands.mintOceanTokens();
 			break;

@@ -41,7 +41,7 @@ export async function downloadFile(
 ): Promise<DownloadResponse> {
 	const response = await fetch(url);
 	if (!response.ok) {
-		throw new Error("Response error.");
+		console.log("Response error.");
 	}
 
 	const defaultName = !isNaN(index!) && index! > -1 ? `file_${index}.out` : 'file.out'
@@ -63,7 +63,7 @@ export async function downloadFile(
 	try {
 		await fs.writeFile(filePath, Buffer.from(data));
 	} catch (err) {
-		throw new Error("Error while saving the file:", err.message);
+		console.log("Error while saving the file:", err.message);
 	}
 
 	return { data, filename };

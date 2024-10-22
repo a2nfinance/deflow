@@ -29,7 +29,6 @@ import { Signer, ethers } from "ethers";
 import { CustomComputeAlgorithm, CustomComputeAsset } from "./extendtypes";
 import { interactiveFlow } from "./interactiveFlow";
 import { publishAsset } from "./publishAsset";
-import { message } from "antd";
 
 export class Commands {
 	public signer: Signer;
@@ -649,20 +648,27 @@ export class Commands {
 
 	public async downloadJobResults(args: string[]) {
 
-		const jobResult = await ProviderInstance.getComputeResultUrl(
-			this.providerUrl,
-			this.signer,
-			args[1],
-			parseInt(args[2])
-		);
-		console.log("jobResult ", jobResult);
+		
 
 		try {
-			const path = args[3] ? args[3] : '.';
+			const jobResult = await ProviderInstance.getComputeResultUrl(
+				this.providerUrl,
+				this.signer,
+				args[1],
+				parseInt(args[2])
+			);
+			console.log("jobResult ", jobResult);
+			let path = args[3] ? args[3] : './public/temp';
+			path += `/` + (new Date().getTime()).toString();
+			if (!fs.existsSync(path)){
+				fs.mkdirSync(path, { recursive: true });
+			}
 			const { filename } = await downloadFile(jobResult, path, parseInt(args[2]));
 			console.log("File downloaded successfully:", path + "/" + filename);
+			return {success: true, filePath: path + "/" + filename};
 		} catch (e) {
-			console.log(`Download url dataset failed: ${e}`);
+			console.log(`Download url dataset failed: ${e.message}`);
+			return {success: false, message: e.message};
 		}
 	}
 
