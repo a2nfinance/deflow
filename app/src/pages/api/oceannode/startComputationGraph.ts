@@ -1,17 +1,17 @@
 import connect from '@/database/connect';
-import Job, { JOB_STATES, JOB_TYPES } from '@/database/models/job';
 import { executeComputeGraphQueue } from '@/queue';
 import { NextApiRequest, NextApiResponse } from 'next';
+import Run from "@/database/models/run";
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
-        // need to validate
         const {
-            experimentId,
+            owner,
             runId
         } = req.body;
-        if (experimentId && runId) {
+        if (runId) {
             try {
-                executeComputeGraphQueue.add(experimentId, runId);
+                let run = await Run.findById(runId);
+                executeComputeGraphQueue.add({run: run});
                 return res.status(200).send({success: true, message: "Starting computation graph"});
             } catch (error) {
                 console.log(error)
