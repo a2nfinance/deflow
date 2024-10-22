@@ -7,6 +7,16 @@ let Schema = mongoose.Schema;
 // job_type: publish_asset, pulish_algo, start_compute
 // state: processing, failed, finished
 // result: result of the process
+export const JOB_TYPES = {
+    PUBLISH_ASSET: "publish_asset",
+    PUBLISH_ALGO: "pulish_algo",
+    PUBLISH_COMPUTE: "start_compute"
+}
+export const JOB_STATES = {
+    PROCESSING: "processing",
+    FAILED: "failed",
+    FINISHED: "finished",
+}
 let job = new Schema({
     owner: {
         type: String,

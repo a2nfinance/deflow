@@ -2,19 +2,23 @@ import mongoose from 'mongoose';
 let Schema = mongoose.Schema;
 
 let run = new Schema({
+    owner: {
+        type: String,
+        require: true
+    },
     experiment_id: {
         type: String,
         require: true
     },
-    compute_nodes: {
+    nodes: {
         type: Object,
         require: true
     },
-    compute_graph: {
+    edges: {
         type: Object,
         require: true
     },
-    execution_orders: {
+    orders: {
         type: Object,
         require: true
     },
@@ -33,6 +37,6 @@ let run = new Schema({
         default: Date.now
     }
 });
-let Run = mongoose.model('Experiment', run);
+let Run = mongoose.model('Run', run);
 mongoose.models = {};
 export default Run;

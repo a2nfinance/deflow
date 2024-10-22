@@ -6,15 +6,15 @@ let experiment = new Schema({
         type: String,
         require: true
     },
-    compute_nodes: {
+    nodes: {
         type: Object,
         require: true
     },
-    compute_graph: {
+    edges: {
         type: Object,
         require: true
     },
-    execution_orders: {
+    orders: {
         type: Object,
         require: true
     },
