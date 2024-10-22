@@ -50,7 +50,7 @@ export const LayoutProvider = (props: Props) => {
                             key: '3',
                             icon: <AiOutlineExperiment />,
                             label: "New experiment",
-                            onClick: () => router.push("/experiments/create")
+                            onClick: () => router.push("/experiment/new")
                         },
                         { type: "divider" },
                         {

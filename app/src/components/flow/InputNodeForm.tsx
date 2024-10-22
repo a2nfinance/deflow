@@ -1,46 +1,53 @@
 import { useOceanNode } from "@/hooks/useOceanNode";
-import { Button, Form, Input, Select } from "antd"
-import { useCallback, useState } from "react"
+import { Button, Form, Input, Select } from "antd";
+import { useCallback, useEffect, useState } from "react";
 
 export const InputNodeForm = ({ onFinish, node }: { onFinish: (values: any) => void, node: any }) => {
-    const [assets, setAssets] = useState<{label: string, value: string}[]>([]);
-    const [algos, setAlgos] = useState<{label: string, value: string}[]>([]);
-    const [computeEnvs, setComputeEnvs] = useState<{label: string, value: string}[]>([]);
-    const {getComputeEnvs, checkCorrectNode, getDDOs} = useOceanNode();
-    const handleOnchange = useCallback(async (e) => {
+    const [assets, setAssets] = useState<{ label: string, value: string }[]>([]);
+    const [algos, setAlgos] = useState<{ label: string, value: string }[]>([]);
+    const [computeEnvs, setComputeEnvs] = useState<{ label: string, value: string }[]>([]);
+    const { getComputeEnvs, checkCorrectNode, getDDOs } = useOceanNode();
+    async function fetchData(nodeUrl: string) {
         let url: URL;
         try {
-            url = new URL(e.target.value);
-            let isCorrectNode = await checkCorrectNode(e.target.value);
+            url = new URL(nodeUrl);
+            let isCorrectNode = await checkCorrectNode(nodeUrl);
             if (!isCorrectNode) return;
-            let envs = await getComputeEnvs(e.target.value);
-            let {algos, datasets} = await getDDOs(url);
+            let envs = await getComputeEnvs(nodeUrl);
+            let { algos, datasets } = await getDDOs(url);
             setComputeEnvs(envs);
             setAlgos(algos);
             setAssets(datasets);
-        } catch(error) {
+        } catch (error) {
             return;
         }
+    }
+    const handleOnchange = useCallback(async (e) => {
+        fetchData(e.target.value)
     }, [assets, algos, computeEnvs])
-    return <Form name={`form-${node.id}`} layout="vertical" onFinish={onFinish} initialValues={{
-        "label": node.data.label,
-        "ocean_node_address": node.data.ocean_node_address,
-        "ddo_ids": node.data.ddo_ids,
-    }}>
-        <Form.Item name={`label_${node.id}`} label="Label">
+    useEffect(() => {
+        if (node.data.ocean_node_address) {
+            fetchData(node.data.ocean_node_address);
+        }
+    }, [assets, algos, computeEnvs])
+    return <Form name={`form-${node.id}`} layout="vertical" onFinish={onFinish} >
+        <Form.Item name={`label_${node.id}`} label="Label" initialValue={node.data.label}>
             <Input size="large" placeholder="Label" />
         </Form.Item>
-        <Form.Item name={`ocean_node_address_${node.id}`} label="Ocean Node Address" rules={[{required: true, message: "Ocean node is missing", type: "url"}]}>
-            <Input size="large" placeholder="Ocean Node Address" onChange={(e) => handleOnchange(e)}/>
+        <Form.Item name={`ocean_node_address_${node.id}`} initialValue={node.data.ocean_node_address} label="Ocean Node Address" rules={[{ required: true, message: "Ocean node is missing", type: "url" }]}>
+            <Input size="large" placeholder="Ocean Node Address" onChange={(e) => handleOnchange(e)} />
         </Form.Item>
-        <Form.Item name={`algorithm_ddo_id_${node.id}`} label="Algorithm DDO ID" rules={[{required: true, message: "Algorithm is missing"}]}>
+        <Form.Item name={`algorithm_id_${node.id}`} initialValue={node.data.algorithm_id} label="Algorithm DDO ID" rules={[{ required: true, message: "Algorithm is missing" }]}>
             <Select size="large" options={algos} />
         </Form.Item>
-        <Form.Item name={`asset_ddo_id_${node.id}`} label="Asset DDO ID" rules={[{required: true, message: "Dataset is missing"}]}>
+        <Form.Item name={`dataasset_id_${node.id}`} initialValue={node.data.dataasset_id} label="Asset DDO ID" rules={[{ required: true, message: "Dataset is missing" }]}>
             <Select size="large" options={assets} />
         </Form.Item>
-        <Form.Item name={`compute_env_${node.id}`} label="Compute ENV">
+        <Form.Item name={`compute_env_${node.id}`} initialValue={node.data.compute_env_id} label="Compute ENV">
             <Select size="large" options={computeEnvs} />
+        </Form.Item>
+        <Form.Item help={"Result filename will be used to publish an DDO asset"} name={`output_filename_${node.id}`} initialValue={node.data.output_filename} label={"Output file name"}>
+            <Input size="large" placeholder="E.g. people.txt, token_history.arff" />
         </Form.Item>
         <Form.Item>
             <Button size="large" block type="primary" htmlType="submit">Update</Button>

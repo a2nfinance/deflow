@@ -18,6 +18,7 @@ import { Button, Card, Col, Divider, Form, Input, Row, Steps } from 'antd';
 import { useCallback, useRef, useState } from 'react';
 import { InputNodeForm } from "./InputNodeForm";
 import { MiddleAndOutputForm } from "./MiddleAndOutputForm";
+import { useDB } from "@/hooks/useDB";
 
 const initialXY = 0;
 
@@ -45,6 +46,7 @@ export const NodesGraph = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState(initialNodes[0]);
+  const {createExperimentAndRun} = useDB();
   const addNewNode = useCallback((type: number) => {
     let nodeType = "";
     if (type === 2) nodeType = "input";
@@ -142,10 +144,16 @@ export const NodesGraph = () => {
     //@ts-ignore
     selectedNode.data.ocean_node_address = values[`ocean_node_address_${selectedNode.id}`]
     selectedNode.data.label = values[`label_${selectedNode.id}`]
-    if (values["ddo_ids"]) {
-      //@ts-ignore
-      selectedNode.data.ddoIds = values[`ddo_ids_${selectedNode.id}`];
-    }
+    // if (values["ddo_ids"]) {
+    //@ts-ignore
+    selectedNode.data.algorithm_id = values[`algorithm_id_${selectedNode.id}`];
+     //@ts-ignore
+    selectedNode.data.dataasset_id = values[`dataasset_id_${selectedNode.id}`];
+     //@ts-ignore
+    selectedNode.data.compute_env_id = values[`compute_env_${selectedNode.id}`];
+    //@ts-ignore
+    selectedNode.data.output_filename = values[`output_filename_${selectedNode.id}`];
+    // }
     setNodes(nodes => nodes.map((node, index) => {
       if (node.id === selectedNode.id) {
         return selectedNode;
@@ -157,11 +165,23 @@ export const NodesGraph = () => {
   const nodeFormComponent = (node) => {
     if (node)
       if (node.type === "input") {
-        return <InputNodeForm onFinish={onFinish} node={node}/>
+        return <InputNodeForm onFinish={onFinish} node={node} />
       } else {
-        return <MiddleAndOutputForm onFinish={onFinish} node={node} />
+        return <MiddleAndOutputForm onFinish={handleSubmitExperimentAndRun} node={node} />
       }
   }
+
+  const handleSubmitExperimentAndRun = useCallback((values) =>{
+    let orders = getTopologicalOrdering(edges);
+    createExperimentAndRun({
+        owner: "0x7b2eb7cEA81Ea3E257dEEAefBE6B0F6A1b411042",
+        name: values["name"],
+        description: values["description"],
+        nodes: nodes,
+        edges: edges,
+        orders: orders
+    })
+  }, [edges, nodes])
 
 
   const ordersComponent = (edgesArr, nodeArr) => {
@@ -226,17 +246,18 @@ export const NodesGraph = () => {
             </ReactFlow>
           </div>
         </Col>
-        
+
         <Col span={6}>
           <Card title="Experiment settings" size="small">
-             <Form layout="vertical">
-                <Form.Item label={"Name"} name={"name"}>
-                  <Input size="large" />
-                </Form.Item>
-                <Form.Item label={"Description"} name={"description"}>
-                  <Input size="large" />
-                </Form.Item>
-             </Form>
+            <Form layout="vertical" onFinish={handleSubmitExperimentAndRun}>
+              <Form.Item label={"Name"} name={"name"}>
+                <Input size="large" />
+              </Form.Item>
+              <Form.Item label={"Description"} name={"description"}>
+                <Input size="large" />
+              </Form.Item>
+              <Button size="large" htmlType="submit" type="primary" block>Save & Start new run</Button>
+            </Form>
           </Card>
           <Divider />
           <Card title={selectedNode.data.label} size="small">
