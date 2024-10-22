@@ -1,7 +1,7 @@
 import { URL } from "url";
 const chainId = process.env.NEXT_PUBLIC_CHAIN_ID!;
 export const useOceanNode = () => {
-    const checkCorrectNode = async (nodeUrl: URL) => {
+    const checkCorrectNode = async (nodeUrl: string) => {
         let req = await fetch(`${nodeUrl}`);
         let res = await req.json();
         if (res.chainIds.length && res.chainIds.indexOf(chainId) !== -1) {
@@ -9,7 +9,7 @@ export const useOceanNode = () => {
         }
         return false;
     }
-    const getComputeEnvs = async (nodeUrl: URL) => {
+    const getComputeEnvs = async (nodeUrl: string) => {
         let computeEnvsReq = await fetch(`${nodeUrl}/api/services/computeEnvironments?chainId=${chainId}`);
         let computeEnvsRes = await computeEnvsReq.json();
         let computeEnvs = computeEnvsRes[chainId].map((env) => {
