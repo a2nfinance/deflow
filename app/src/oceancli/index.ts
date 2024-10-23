@@ -58,20 +58,16 @@ function help() {
 	);
 }
 
-export async function start(nodeUrl: string, args: any[]) {
+export async function start(nodeUrl: string, args: any[], accountNumber: number) {
 	const provider = new ethers.providers.JsonRpcProvider(process.env.RPC);
 	console.log("Using RPC: " + process.env.RPC);
-	let signer;
-	if (process.env.PRIVATE_KEY)
-		signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-	else {
-		signer = ethers.Wallet.fromMnemonic(process.env.MNEMONIC || "");
-		signer = await signer.connect(provider);
-	}
+	let PRIVATE_KEY = process.env[`PRIVATE_KEY_${accountNumber}`];
+	let signer = new ethers.Wallet(PRIVATE_KEY!, provider);
+	
 	console.log("Using account: " + (await signer.getAddress()));
 
 	const { chainId } = await signer.provider.getNetwork();
-	const commands = new Commands(nodeUrl, signer, parseInt(chainId));
+	const commands = new Commands(nodeUrl, signer, chainId);
 	switch (args[0]) {
 		case "start":
 			await commands.start()

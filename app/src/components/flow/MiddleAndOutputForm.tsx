@@ -42,9 +42,6 @@ export const MiddleAndOutputForm = ({ onFinish, node }: { onFinish: (values: any
     <Form.Item name={`compute_env_${node.id}`} initialValue={node.data.compute_env_id} label="Compute ENV">
       <Select size="large" options={computeEnvs} />
     </Form.Item>
-    <Form.Item help={"Result filename will be used to publish an DDO asset"} name={`output_filename_${node.id}`} initialValue={node.data.output_filename} label={"Output file name"}>
-            <Input size="large" placeholder="E.g. people.txt, token_history.arff" />
-        </Form.Item>
     <Form.Item>
       <Button size="large" block type="primary" htmlType="submit">Update</Button>
     </Form.Item>

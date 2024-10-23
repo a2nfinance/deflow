@@ -5,7 +5,6 @@ import Run from "@/database/models/run";
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         const {
-            owner,
             runId
         } = req.body;
         if (runId) {

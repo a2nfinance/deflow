@@ -147,12 +147,14 @@ export const NodesGraph = () => {
     // if (values["ddo_ids"]) {
     //@ts-ignore
     selectedNode.data.algorithm_id = values[`algorithm_id_${selectedNode.id}`];
-     //@ts-ignore
-    selectedNode.data.dataasset_id = values[`dataasset_id_${selectedNode.id}`];
+    if (selectedNode.type === "input") {
+      //@ts-ignore
+      selectedNode.data.dataasset_id = values[`dataasset_id_${selectedNode.id}`];
+    } 
+   
      //@ts-ignore
     selectedNode.data.compute_env_id = values[`compute_env_${selectedNode.id}`];
-    //@ts-ignore
-    selectedNode.data.output_filename = values[`output_filename_${selectedNode.id}`];
+
     // }
     setNodes(nodes => nodes.map((node, index) => {
       if (node.id === selectedNode.id) {
@@ -167,7 +169,7 @@ export const NodesGraph = () => {
       if (node.type === "input") {
         return <InputNodeForm onFinish={onFinish} node={node} />
       } else {
-        return <MiddleAndOutputForm onFinish={handleSubmitExperimentAndRun} node={node} />
+        return <MiddleAndOutputForm onFinish={onFinish} node={node} />
       }
   }
 
