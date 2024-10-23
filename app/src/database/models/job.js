@@ -45,7 +45,7 @@ let job = new Schema({
     state: {
         type: String,
         require: true,
-        default: "processing"
+        default: JOB_STATES.PROCESSING
     },
     result: {
         type: Object,

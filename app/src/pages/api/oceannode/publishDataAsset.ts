@@ -26,6 +26,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 ddo.services[0].files.files[0].url = assetUrl;
                 ddo.services[0].serviceEndpoint = nodeUrl;
                 ddo.services[0].compute.publisherTrustedAlgorithms = publisherTrustedAlgorithms?.length ? publisherTrustedAlgorithms : [];
+                ddo.metadata.created = (new Date()).toISOString();
+                ddo.metadata.updated = (new Date()).toISOString();
                 // Create a Job here
                 let job = new Job({
                     owner: owner,

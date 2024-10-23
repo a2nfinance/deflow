@@ -1,3 +1,4 @@
+// This file is used for testing only
 let edges = [
     {
         "id": "1-2",

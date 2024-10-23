@@ -1,9 +1,8 @@
 import connect from '@/database/connect';
-import { NextApiRequest, NextApiResponse } from 'next';
-import {start} from "@/oceancli/index";
+import Job, { JOB_STATES, JOB_TYPES } from '@/database/models/job';
 import pythonAlgo from "@/oceancli/metadata/pythonAlgo.json";
 import { assetQueue } from '@/queue';
-import Job, {JOB_STATES, JOB_TYPES} from '@/database/models/job';
+import { NextApiRequest, NextApiResponse } from 'next';
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         // need to validate
@@ -11,9 +10,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             owner,
             nodeUrl,
             assetUrl,
-            name
+            name,
+            entrypoint,
+            image,
+            tag,
+            checksum
         } = req.body;
-        if (owner && nodeUrl && assetUrl && name) {
+        if (owner && nodeUrl && assetUrl && name && entrypoint && image && checksum) {
             try {
                 let ddo = {
                     ...pythonAlgo,
@@ -25,6 +28,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 ddo.services[0].fileObject.url = assetUrl;
                 ddo.services[0].files.files[0].url = assetUrl;
                 ddo.services[0].serviceEndpoint = nodeUrl;
+                ddo.metadata.created = (new Date()).toISOString();
+                ddo.metadata.updated = (new Date()).toISOString();
+                // Update metadata
+                ddo.metadata.algorithm.container = {
+                    ...ddo.metadata.algorithm.container,
+                    entrypoint: entrypoint,
+                    image: image,
+                    tag: tag,
+                    checksum: checksum
+                }
                 // Create a Job here
                 let job = new Job({
                     owner: owner,

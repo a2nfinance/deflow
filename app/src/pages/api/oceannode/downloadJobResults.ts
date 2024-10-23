@@ -1,6 +1,5 @@
 import connect from '@/database/connect';
 import Job, { JOB_STATES, JOB_TYPES } from '@/database/models/job';
-import { start } from "@/oceancli/index";
 import { downloadAndPublishQueue } from '@/queue';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -14,7 +13,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             index,
             path,
             destinationNodeUrl,
-            outputFileName
+            outputFilename
         } = req.body;
         if (nodeUrl && envIdAndJobId) {
             try {
@@ -30,7 +29,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                     nodeUrl: nodeUrl, 
                     args: ["downloadJobResults", envIdAndJobId, index, path], 
                     destinationNodeUrl: [destinationNodeUrl],
-                    outputFileName: outputFileName,
+                    outputFilename: outputFilename,
                     jobId: savedJob._id
                 })
                 res.status(200).send({success: true, jobId: savedJob._id});

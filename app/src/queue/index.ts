@@ -4,6 +4,7 @@ import { start } from "@/oceancli";
 import Queue from "bull";
 import dotenv from "dotenv";
 import fs from "fs";
+import tar from 'tar-fs';
 import { Octokit } from "octokit";
 dotenv.config();
 const REDIS_SERVER = process.env.REDIS_SERVER;
@@ -71,7 +72,17 @@ downloadAndPublishQueue.process(async (job) => {
             // Need to change filename based on settings
             let pathParts = result.filePath.split("/");
             let gitFileName = process.env.GIT_FOLDER_PATH! + "/" + pathParts[pathParts.length - 2] + "/" + outputFilename;
-            const fileContent = fs.readFileSync(result.filePath, { encoding: 'base64' });
+
+            // Process tar file
+            let newPath: string = result.filePath.replace("out", "tar");
+            fs.renameSync(result.filePath, newPath);
+            let lastSplashIndex = newPath.lastIndexOf("/");
+            let extractPath = newPath.slice(0, lastSplashIndex);
+            fs.createReadStream(newPath).pipe(tar.extract(extractPath));
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            let files = fs.readdirSync(extractPath + "/outputs");
+            const fileContent = fs.readFileSync(extractPath + "/outputs/" + files[0] , { encoding: 'base64' });
+
             let uploadResult = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
                 owner: process.env.GIT_OWNER!,
                 repo: process.env.GIT_REPO!,
