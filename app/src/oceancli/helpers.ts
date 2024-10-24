@@ -81,8 +81,8 @@ export async function createAsset(
 	templateIndex: number = 1,
 	macOsProviderUrl?: string,
 	encryptDDO: boolean = true,
+	fileObject?: any
 ) {
-	console.log("Start to create asset DDO:", ddo.services[0]);
 	const { chainId } = await owner.provider!.getNetwork();
 	const nft = new Nft(owner, chainId);
 	const nftFactory = new NftFactory(config.nftFactoryAddress, owner);
@@ -177,7 +177,9 @@ export async function createAsset(
 	// create the files encrypted string
 	assetUrl.datatokenAddress = datatokenAddressAsset;
 	assetUrl.nftAddress = nftAddress;
-	console.log("Start to modify asset DDO:", ddo.services[0]);
+	if (fileObject) {
+		ddo.services[0].fileObject = fileObject;
+	}
 	ddo.services[0].files = templateIndex === 4 ? '' : await ProviderInstance.encrypt(
 		assetUrl,
 		chainId,
@@ -190,7 +192,6 @@ export async function createAsset(
 	ddo.id =
 		"did:op:" +
 		SHA256(ethers.utils.getAddress(nftAddress) + chainId.toString(10));
-	console.log("After modify asset DDO:", ddo.services[0]);
 	let metadata;
 	let metadataHash;
 	let flags;

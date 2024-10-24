@@ -89,7 +89,8 @@ export class Commands {
 				this.aquarius,
 				1,
 				this.macOsProviderUrl,
-				encryptDDO
+				encryptDDO,
+				asset.services[0].fileObject
 			);
 			console.log("Asset published. ID:  " + urlAssetId);
 			return { success: true, assetId: urlAssetId }
@@ -123,7 +124,8 @@ export class Commands {
 				this.aquarius,
 				1,
 				this.macOsProviderUrl,
-				encryptDDO
+				encryptDDO,
+				null
 			);
 			// add some more checks
 			console.log("Algorithm published. DID:  " + algoDid);
@@ -294,10 +296,11 @@ export class Commands {
 		);
 
 		const mytime = new Date();
-		const computeMinutes = 5;
+		const computeMinutes = 15;
 		mytime.setMinutes(mytime.getMinutes() + computeMinutes);
+		
 		const computeValidUntil = Math.floor(mytime.getTime() / 1000);
-
+		console.log("Compute valid Until:", computeValidUntil);
 		const computeEnvID = args[3];
 		const chainComputeEnvs = computeEnvs[algoDdo.chainId];
 		let computeEnv = chainComputeEnvs[0];
@@ -648,9 +651,6 @@ export class Commands {
 	}
 
 	public async downloadJobResults(args: string[]) {
-
-		
-
 		try {
 			const jobResult = await ProviderInstance.getComputeResultUrl(
 				this.providerUrl,

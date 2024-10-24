@@ -1,10 +1,10 @@
 import {
-    ComputeAlgorithm,
-    ComputeAsset,
-    ComputeJob,
-    ComputeOutput,
-    LoggerInstance,
-    Provider
+  ComputeAlgorithm,
+  ComputeAsset,
+  ComputeJob,
+  ComputeOutput,
+  LoggerInstance,
+  Provider
 } from "@oceanprotocol/lib";
 
 import { Signer } from 'ethers';
@@ -40,9 +40,15 @@ class CustomProvider extends Provider {
     // If the compute engine is free then using 'startFreeCompute' to avoid this error:
     // Compute start failed:  500 Internal Server Error Free Jobs cannot be started here, use startFreeCompute
     // Default vallue is 'computeStart'
-    const computeStartUrl = super.getEndpointURL(serviceEndpoints, '/api/services/freeCompute')
+    let computeStartUrl = super.getEndpointURL(serviceEndpoints, '/api/services/freeCompute')
       ? super.getEndpointURL(serviceEndpoints, '/api/services/freeCompute').urlPath
       : null
+
+    if (computeEnv.indexOf("-nofree-") !== -1) {
+      computeStartUrl = super.getEndpointURL(serviceEndpoints, 'computeStart')
+      ? super.getEndpointURL(serviceEndpoints, 'computeStart').urlPath
+      : null
+    }
 
 
     const consumerAddress = await consumer.getAddress()
