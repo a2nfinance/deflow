@@ -66,13 +66,13 @@ assetQueue.process(async (job) => {
 
 
 
-startComputeQueue.process(async (job) => {
+startComputeQueue.process((job) => {
     const { nodeUrl, args, jobId, accountNumber } = job.data;
     startCompute(nodeUrl, args, jobId, accountNumber);
 })
 
 
-downloadAndPublishQueue.process(async (job) => {
+downloadAndPublishQueue.process((job) => {
     const { nodeUrl, args, destinationNodeUrls, jobId, accountNumber } = job.data;
     downloadAndPublish(nodeUrl, args, destinationNodeUrls, jobId, accountNumber);
 })

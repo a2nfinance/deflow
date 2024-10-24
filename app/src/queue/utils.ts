@@ -20,7 +20,14 @@ const checkCompleteWorkflow = (jobs, numberOfActions) => {
     }
     return true;
 }
-
+const oneOfJobFail = (jobs) => {
+    let failedJobs = jobs.filter(j => j.state === JOB_STATES.FAILED);
+    if (failedJobs.length) {
+        console.log("Failed jobs:", failedJobs);
+        return true;
+    }
+    return false;
+}
 export {
-    checkCompleteWorkflow, getAccountNumberForNodes
+    checkCompleteWorkflow, getAccountNumberForNodes, oneOfJobFail
 };

@@ -5,6 +5,7 @@ import fs from "fs";
 import { Octokit } from "octokit";
 import tar from 'tar-fs';
 import { downloadAndPublishQueue } from ".";
+// var getDDOForce = {};
 const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, accountNumber) => {
     try {
         let result = await start(nodeUrl, args, accountNumber);
@@ -28,7 +29,7 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
             // Need to change filename based on settings
             let pathParts = result.filePath.split("/");
             let gitFileName = process.env.GIT_FOLDER_PATH! + "/" + pathParts[pathParts.length - 2] + "/" + files[0];
-
+            // return;
             let uploadResult = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
                 owner: process.env.GIT_OWNER!,
                 repo: process.env.GIT_REPO!,
@@ -43,7 +44,10 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
                     'X-GitHub-Api-Version': '2022-11-28'
                 }
             })
-            let ddos: { nodeUrl: string, ddoId: string }[] = [];
+            let ddos: { nodeUrl: string, ddoId: string, filePath: string }[] = [];
+            console.log("=========================================")
+            console.log("Publish dataset to:", destinationNodeUrls);
+            console.log("=========================================")
             for (let i = 0; i < destinationNodeUrls.length; i++) {
                 let destinationNodeUrl = destinationNodeUrls[i];
                 if (destinationNodeUrl) {
@@ -82,21 +86,31 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
                                 if (res.found) {
                                     // Update DB here
                                     console.log("Found DDO with ID:", ddoId);
-                                    ddos.push({ nodeUrl: destinationNodeUrl, ddoId: ddoId });
+                                    ddos.push({ nodeUrl: destinationNodeUrl, ddoId: ddoId, filePath:  downloadUrl});
                                     clearInterval(checkDBInterval);
                                 }
                             } catch (e) {
+                                clearInterval(checkDBInterval);
                                 console.log(e);
                             }
 
                         }, 10000)
-                        start(destinationNodeUrl, ["getDDO", ddoId + "/true"], accountNumber);
+
+                        // if (!getDDOForce[destinationNodeUrl]) {
+                        //     getDDOForce[destinationNodeUrl] = true;
+                        //     start(destinationNodeUrl, ["getDDO", ddoId + "/true"], accountNumber).then(() => {
+                        //         getDDOForce[destinationNodeUrl] = false
+                        //     });
+                        // }
+
+                        start(destinationNodeUrl, ["getDDO", ddoId + "/true"], accountNumber)
+                        
                     }
                 }
             }
 
             let updateJobInterval = setInterval(async function () {
-                if (ddos.length === destinationNodeUrls.length) {
+                if (ddos.length && (ddos.length === destinationNodeUrls.length)) {
                     await Job.findOneAndUpdate({ _id: jobId }, { state: JOB_STATES.FINISHED, result: ddos });
                     clearInterval(updateJobInterval);
                 }
@@ -130,7 +144,7 @@ const createDownloadAndPublishJob = async (currentNode, oceanNodeJobId, run, out
             oceanNodeJobId,
             1,
             null],
-        destinationNodeUrl: outgoingNodes.map(node => node.data.ocean_node_address),
+        destinationNodeUrls: outgoingNodes.map(node => node.data.ocean_node_address),
         jobId: savedJob._id,
         accountNumber: accountNumber
     })
