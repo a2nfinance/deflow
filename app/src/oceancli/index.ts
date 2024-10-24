@@ -3,10 +3,6 @@ import { Commands } from "./commands";
 import dotenv from "dotenv";
 dotenv.config();
 
-if (!process.env.MNEMONIC && !process.env.PRIVATE_KEY) {
-	console.error("Have you forgot to set MNEMONIC or PRIVATE_KEY?");
-	process.exit(0);
-}
 if (!process.env.RPC) {
 	console.error("Have you forgot to set env RPC?");
 	process.exit(0);
@@ -62,6 +58,7 @@ export async function start(nodeUrl: string, args: any[], accountNumber: number)
 	const provider = new ethers.providers.JsonRpcProvider(process.env.RPC);
 	console.log("Using RPC: " + process.env.RPC);
 	let PRIVATE_KEY = process.env[`PRIVATE_KEY_${accountNumber}`];
+	console.log("Private key:", PRIVATE_KEY);
 	let signer = new ethers.Wallet(PRIVATE_KEY!, provider);
 	
 	console.log("Using account: " + (await signer.getAddress()));
@@ -115,5 +112,4 @@ export async function start(nodeUrl: string, args: any[], accountNumber: number)
 			console.error("Not sure what command to use ? use h for help.");
 			break;
 	}
-	process.exit(0);
 }

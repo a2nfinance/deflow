@@ -74,6 +74,7 @@ export class Commands {
 			console.log(e);
 			return { success: false, message: e.message }
 		}
+		console.log("Publish asset with services:", asset.services[0]);
 		const encryptDDO = args[2] === "false" ? false : true;
 		try {
 			// add some more checks

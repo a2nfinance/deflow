@@ -82,6 +82,7 @@ export async function createAsset(
 	macOsProviderUrl?: string,
 	encryptDDO: boolean = true,
 ) {
+	console.log("Start to create asset DDO:", ddo.services[0]);
 	const { chainId } = await owner.provider!.getNetwork();
 	const nft = new Nft(owner, chainId);
 	const nftFactory = new NftFactory(config.nftFactoryAddress, owner);
@@ -176,6 +177,7 @@ export async function createAsset(
 	// create the files encrypted string
 	assetUrl.datatokenAddress = datatokenAddressAsset;
 	assetUrl.nftAddress = nftAddress;
+	console.log("Start to modify asset DDO:", ddo.services[0]);
 	ddo.services[0].files = templateIndex === 4 ? '' : await ProviderInstance.encrypt(
 		assetUrl,
 		chainId,
@@ -188,7 +190,7 @@ export async function createAsset(
 	ddo.id =
 		"did:op:" +
 		SHA256(ethers.utils.getAddress(nftAddress) + chainId.toString(10));
-
+	console.log("After modify asset DDO:", ddo.services[0]);
 	let metadata;
 	let metadataHash;
 	let flags;
@@ -198,6 +200,7 @@ export async function createAsset(
 			chainId,
 			macOsProviderUrl || providerUrl
 		);
+		console.log("Validate DDO:", ddo.services[0]);
 		const validateResult = await aquariusInstance.validate(ddo);
 		metadataHash = validateResult.hash;
 		flags = 2
@@ -254,6 +257,7 @@ export async function updateAssetMetadata(
 	const nft = new Nft(owner, (await owner.provider!.getNetwork()).chainId);
 	let flags;
 	let metadata;
+	console.log("Validate Updated DDO:", updatedDdo.services[0]);
 	const validateResult = await aquariusInstance.validate(updatedDdo);
 	if (encryptDDO) {
 		const providerResponse = await ProviderInstance.encrypt(
