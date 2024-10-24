@@ -5,7 +5,79 @@ import fs from "fs";
 import { Octokit } from "octokit";
 import tar from 'tar-fs';
 import { downloadAndPublishQueue } from ".";
-// var getDDOForce = {};
+
+const downloadAndPushToGithub = async (nodeUrl, args, jobId, accountNumber) => {
+    try {
+        let result = await start(nodeUrl, args, accountNumber);
+        if (result.success) {
+            const octokit = new Octokit({
+                auth: process.env.GIT_TOKEN
+            })
+            // Process tar file
+            let newPath: string = result.filePath.replace("out", "tar");
+
+            fs.renameSync(result.filePath, newPath);
+            let lastSplashIndex = newPath.lastIndexOf("/");
+            let extractPath = newPath.slice(0, lastSplashIndex);
+            fs.createReadStream(newPath).pipe(tar.extract(extractPath));
+
+            await new Promise(resolve => setTimeout(resolve, 5000));
+
+            let files = fs.readdirSync(extractPath + "/outputs");
+            if (files.length === 0) {
+                for (let i = 0; i < 10; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    files = fs.readdirSync(extractPath + "/outputs");
+                    if (files.length > 0) {
+                        break;
+                    }
+                }
+                
+            }
+            if (files.length === 0) {
+                console.log("Could not download result files!");
+                return;
+            }
+
+            let fileContent = fs.readFileSync(extractPath + "/outputs/" + files[0], { encoding: 'base64' });
+           
+
+            // Need to change filename based on settings
+            let pathParts = result.filePath.split("/");
+            let gitFileName = process.env.GIT_FOLDER_PATH! + "/" + pathParts[pathParts.length - 2] + "/" + files[0];
+            // return;
+            let uploadResult = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+                owner: process.env.GIT_OWNER!,
+                repo: process.env.GIT_REPO!,
+                path: gitFileName,
+                message: 'Result from Ocean Node Job ID:' + args[1],
+                committer: {
+                    name: process.env.GIT_NAME!,
+                    email: process.env.GIT_EMAIL!
+                },
+                content: fileContent,
+                headers: {
+                    'X-GitHub-Api-Version': '2022-11-28'
+                }
+            })
+
+            let downloadUrl = uploadResult.data.content?.download_url!;
+            let job = await Job.findById(jobId);
+            if (job) {
+                job.result.computedJob  = {...job.result.computedJob, outputsURL: downloadUrl};
+                let updatedResult = {
+                    ...job.result, 
+                    computedJob: {...job.result.computedJob, outputsURL: downloadUrl}
+                };
+                await Job.findOneAndUpdate({ _id: jobId }, { result: updatedResult });
+                console.log("Downloaded the final result of computation process!")
+            }
+        }
+    } catch(e) {
+        console.log(e);
+    }
+}
+
 const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, accountNumber) => {
     try {
         let result = await start(nodeUrl, args, accountNumber);
@@ -21,10 +93,25 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
             let extractPath = newPath.slice(0, lastSplashIndex);
             fs.createReadStream(newPath).pipe(tar.extract(extractPath));
 
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            await new Promise(resolve => setTimeout(resolve, 5000));
 
             let files = fs.readdirSync(extractPath + "/outputs");
-            const fileContent = fs.readFileSync(extractPath + "/outputs/" + files[0], { encoding: 'base64' });
+            if (files.length === 0) {
+                for (let i = 0; i < 10; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    files = fs.readdirSync(extractPath + "/outputs");
+                    if (files.length > 0) {
+                        break;
+                    }
+                }
+                
+            }
+            if (files.length === 0) {
+                console.log("Could not download result files!");
+                return;
+            }
+            let fileContent = fs.readFileSync(extractPath + "/outputs/" + files[0], { encoding: 'base64' });
+           
 
             // Need to change filename based on settings
             let pathParts = result.filePath.split("/");
@@ -77,6 +164,7 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
                             try {
                                 console.log("Searching Database");
                                 let req = await fetch(`${typesenseUrl}/collections/op_ddo_v4.1.0/documents/search?q=*&filter_by=id:=${ddoId}`, {
+                                    method: "GET",
                                     headers: {
                                         "X-TYPESENSE-API-KEY": "xyz"
                                     }
@@ -86,6 +174,21 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
                                 if (res.found) {
                                     // Update DB here
                                     console.log("Found DDO with ID:", ddoId);
+                                    // Validate DDO here. If DDO has incorrect fileobject, it need to update.
+                                    let document = res.hits[0].document;
+                                    if (document.services[0].fileObject.url !== downloadUrl) {
+                                        document.services[0].fileObject.url = downloadUrl;
+                                        let patchReq = await fetch(`${typesenseUrl}/collections/op_ddo_v4.1.0/documents/${ddoId}`, {
+                                            method: "PATCH",
+                                            headers: {
+                                                "X-TYPESENSE-API-KEY": "xyz"
+                                            },
+                                            body: JSON.stringify(document)
+                                        });
+
+                                        let patchRes = await patchReq.json(); 
+                                        console.log("Incorrect DDO is updated with service:", patchRes.services[0]);
+                                    }
                                     ddos.push({ nodeUrl: destinationNodeUrl, ddoId: ddoId, filePath:  downloadUrl});
                                     clearInterval(checkDBInterval);
                                 }
@@ -95,16 +198,7 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
                             }
 
                         }, 10000)
-
-                        // if (!getDDOForce[destinationNodeUrl]) {
-                        //     getDDOForce[destinationNodeUrl] = true;
-                        //     start(destinationNodeUrl, ["getDDO", ddoId + "/true"], accountNumber).then(() => {
-                        //         getDDOForce[destinationNodeUrl] = false
-                        //     });
-                        // }
-
                         start(destinationNodeUrl, ["getDDO", ddoId + "/true"], accountNumber)
-                        
                     }
                 }
             }
@@ -151,5 +245,5 @@ const createDownloadAndPublishJob = async (currentNode, oceanNodeJobId, run, out
 }
 
 export {
-    createDownloadAndPublishJob, downloadAndPublish
+    createDownloadAndPublishJob, downloadAndPublish, downloadAndPushToGithub
 };

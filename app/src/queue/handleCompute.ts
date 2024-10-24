@@ -3,7 +3,7 @@ import Job, { JOB_STATES, JOB_TYPES } from "@/database/models/job";
 import { start } from "@/oceancli";
 import { getGraph, getIncomingEdges, getOutgoingEdges } from "@/utils/getExecutionOrders";
 import { startComputeQueue } from ".";
-import { createDownloadAndPublishJob } from "./downloadPublishAsset";
+import { createDownloadAndPublishJob, downloadAndPushToGithub } from "./downloadPublishAsset";
 import { checkCompleteWorkflow, getAccountNumberForNodes, oneOfJobFail } from "./utils";
 const startCompute = async (nodeUrl, args, jobId, accountNumber) => {
     try {
@@ -75,7 +75,7 @@ const createExecuteJob = async (node, run, accountNumber, datasets?: any[]) => {
     if (datasets?.length) {
         datasetList = "[" + datasets.join(",") + "]";
     } else {
-        datasetList =  node.data.dataasset_id;
+        datasetList = node.data.dataasset_id;
     }
     startComputeQueue.add({
         nodeUrl: node.data.ocean_node_address,
@@ -102,7 +102,7 @@ const executeComputeGraph = async (run) => {
         if (getStartExcuteJobsOfNode.length === 0) {
             createExecuteJob(firstNodes[i], run, accountNumber);
         }
-        
+
     }
     let doJobInterval = setInterval(async function () {
         let jobs = await Job.find({ run_id: run._id })
@@ -111,6 +111,22 @@ const executeComputeGraph = async (run) => {
             clearInterval(doJobInterval);
         }
         if (checkCompleteWorkflow(jobs, numberOfActions)) {
+            /// Do last action here
+            let lastJob = jobs[numberOfActions - 1];
+            await downloadAndPushToGithub(
+                lastJob.ocean_node_url,
+                [
+                    "downloadJobResults",
+                    lastJob.result.oceanNodeJobId,
+                    1,
+                    null
+                ],
+                lastJob._id,
+                accountNumbers[lastJob.ocean_node_url!]
+            )
+            console.log("=======================================")
+            console.log("All steps in the computation graph have been executed successful!");
+            console.log("=======================================")
             clearInterval(doJobInterval);
         } else {
             console.log("=======================================")
