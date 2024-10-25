@@ -1,6 +1,6 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 
-// import experimentReducer from './experiment/experimentSlice';
+import experimentReducer from './experiment/experimentSlice';
 // import modelReducer from './model/modelSlice';
 import processReducer from './process/processSlice';
 // import runReducer from './run/runSlice';
@@ -8,9 +8,7 @@ export function makeStore() {
     return configureStore({
         reducer: {
             process: processReducer,
-            // experiment: experimentReducer,
-            // run: runReducer,
-            // model: modelReducer
+            experiment: experimentReducer
         },
         middleware: (getDefaultMiddleware) =>
             getDefaultMiddleware({
