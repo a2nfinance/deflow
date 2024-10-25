@@ -1,35 +1,58 @@
 import { useAppSelector } from "@/controller/hooks";
 import { JOB_STATES, JOB_TYPES } from "@/database/models/job";
 import { useDB } from "@/hooks/useDB";
+import { useConnectWallet } from "@web3-onboard/react";
 import { Background, Controls, ReactFlow } from "@xyflow/react";
 import '@xyflow/react/dist/style.css';
-import { Button, Card, Col, Divider, Row } from "antd";
+import { Button, Card, Col, Divider, Row, Space } from "antd";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { GraphNodes } from "../graph/Nodes";
 import { ComputeJobDesc } from "./ComputeJobDesc";
 import { PublisAssetJobDesc } from "./PublishAssetJobDesc";
-import { useConnectWallet } from "@web3-onboard/react";
 
 export const RunDetail = () => {
-    const [{wallet}] = useConnectWallet();
+    const [{ wallet }] = useConnectWallet();
     const router = useRouter();
     const { run, jobs } = useAppSelector(state => state.experiment);
-    const { getRunById, getJobsByRunId } = useDB();
+    const { getRunById, getJobsByRunId, startComputeGraph } = useDB();
+
 
 
     useEffect(() => {
         if (router.query?.id) {
-            getRunById(router.query?.id.toString());
-            getJobsByRunId(router.query?.id.toString());
+            let id = router.query?.id;
+            getRunById(id.toString());
+            getJobsByRunId(id.toString());
+
+            let getJobsByInterval = setInterval(function () {
+                console.log("Updating jobs...")
+                getJobsByRunId(id.toString());
+
+            }, 5000)
+
+            return () => clearInterval(getJobsByInterval);
         }
     }, [router.query?.id, wallet?.accounts[0].address]);
 
+
+    const handleStartNow = useCallback(() => {
+        if (router.query?.id) {
+            startComputeGraph(router.query?.id.toString());
+        }
+    }, [router.query?.id])
+
     return (
-        <Card style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <Card style={{ maxWidth: 1200, margin: '0 auto' }} >
             <Row gutter={12}>
                 <Col span={10}>
-                    <Card title={"Computation Flow"}>
+                    <Card title={"Computation Flow"} extra={
+                        <Space>
+                            {!jobs.length && <Button type='primary' size="large" onClick={() => handleStartNow()}>Start now</Button>}
+                            {!!jobs.length && <Button type='primary' size="large" disabled>Start now</Button>}
+                        </Space>
+
+                    }>
                         <div style={{ height: '400px', color: "black" }}>
                             <ReactFlow
                                 nodes={run.nodes}
@@ -62,10 +85,10 @@ export const RunDetail = () => {
                                 if (job.job_type === JOB_TYPES.PUBLISH_ASSET) {
                                     return <PublisAssetJobDesc key={`publish-asset-${index}`} node={node} job={job} />
                                 } else if (job.job_type === JOB_TYPES.PUBLISH_COMPUTE) {
-                                    if (job.state === JOB_STATES.FINISHED && node.type === "output") {
+                                    if (job.state === JOB_STATES.FINISHED && node?.type === "output") {
                                         return <>
                                             <Card title={"Computation graph has been executed successful!"}>
-                                                <Button type={"primary"} size="large" block onClick={() => window.open(job.result.computedJob.outputsURL, "_blank")}>Download the Final Result Here</Button>
+                                                <Button type={"primary"} size="large" block onClick={() => window.open(job?.result?.computedJob?.outputsURL, "_blank")}>Download the Final Result Here</Button>
                                             </Card>
                                             <Divider />
                                             <ComputeJobDesc key={`start-compute-${index}`} node={node} job={job} />

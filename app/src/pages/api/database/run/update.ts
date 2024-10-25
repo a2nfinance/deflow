@@ -1,6 +1,6 @@
 import connect from '@/database/connect';
 import { NextApiRequest, NextApiResponse } from 'next';
-import Experiment from "@/database/models/expirement";
+import Run, { RunStates } from "@/database/models/run";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
@@ -8,10 +8,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const {
             owner,
             _id,
+            state
         } = req.body;
-        if (owner && _id) {
+        if (owner && _id && state) {
             try {
-                await Experiment.findOneAndUpdate({ owner: owner, _id: _id}, req.body);
+                await Run.findOneAndUpdate({ owner: owner, _id: _id}, {state: state});
                 res.json({ success: true });
             } catch (error) {
                 console.log(error)

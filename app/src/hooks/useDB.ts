@@ -1,6 +1,9 @@
 import { Experiment, Run, setExperiment, setJobs, setList, setRun, setRuns } from "@/controller/experiment/experimentSlice";
 import { useAppDispatch } from "@/controller/hooks";
 import { actionNames, updateActionStatus } from "@/controller/process/processSlice";
+import { JOB_STATES } from "@/database/models/job";
+import { RunStates } from "@/database/models/run";
+import { checkCompleteWorkflow, oneOfJobFail } from "@/queue/utils";
 import { useConnectWallet } from "@web3-onboard/react";
 
 export const useDB = () => {
@@ -107,48 +110,87 @@ export const useDB = () => {
 
     }
 
-    const getRunById = async (_id: string) => {
+    const getRunById = async (_id: string, notApplyDispatch?: boolean) => {
         if (wallet?.accounts[0].address) {
             let getReq = await fetch("/api/database/run/getByCreatorAndId", {
                 method: "POST",
-                body: JSON.stringify({ _id: _id,  owner: wallet?.accounts[0].address}),
+                body: JSON.stringify({ _id: _id, owner: wallet?.accounts[0].address }),
                 headers: {
                     "Content-Type": "application/json",
                 }
             });
 
             let run = await getReq.json();
+            if (!notApplyDispatch) {
+                dispatch(setRun(run))
+            }
+            return run;
 
-            dispatch(setRun(run))
-           
         }
 
     }
-
+    const updateRunById = async (_id, state) => {
+        if (wallet?.accounts[0].address) {
+            await fetch("/api/database/run/update", {
+                method: "POST",
+                body: JSON.stringify({ _id: _id, owner: wallet?.accounts[0].address, state: state }),
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            });
+        }
+    }
     const getJobsByRunId = async (run_id: string) => {
         if (wallet?.accounts[0].address) {
             let getRq = await fetch("/api/database/job/getByRunId", {
                 method: "POST",
-                body: JSON.stringify({ run_id: run_id,  owner: wallet?.accounts[0].address}),
+                body: JSON.stringify({ run_id: run_id, owner: wallet?.accounts[0].address }),
                 headers: {
                     "Content-Type": "application/json",
                 }
             });
 
             let jobs = await getRq.json();
+            let isOneJobFail = oneOfJobFail(jobs)
+            if (isOneJobFail) {
+                updateRunById(run_id, JOB_STATES.FAILED);
+            } else {
+                let run = await getRunById(run_id);
+                if (run.state !== RunStates.FINISHED) {
+                    let isCompleted = checkCompleteWorkflow(jobs, 2 * run.nodes.length - 1);
+                    if (isCompleted) {
+                        updateRunById(run_id, JOB_STATES.FINISHED);
+                    }
+                }
+
+            }
             dispatch(setJobs(jobs));
-           
+
         }
     }
 
-    return { 
-        createExperimentAndRun, 
-        getExperimentsByCreator, 
-        searchRunsByExperimentId, 
-        getExperimentByCreatorAndId, 
-        createRun, 
+    const startComputeGraph = async (run_id) => {
+        if (wallet?.accounts[0].address) {
+            await fetch("/api/oceannode/startComputationGraph", {
+                method: "POST",
+                body: JSON.stringify({ runId: run_id}),
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            });
+            await updateRunById(run_id, JOB_STATES.PROCESSING);
+        }
+    }
+
+    return {
+        createExperimentAndRun,
+        getExperimentsByCreator,
+        searchRunsByExperimentId,
+        getExperimentByCreatorAndId,
+        createRun,
         deleteRunById,
         getRunById,
-        getJobsByRunId
+        getJobsByRunId,
+        startComputeGraph
     }
 }

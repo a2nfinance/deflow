@@ -1,3 +1,9 @@
-.all-daos-list .ant-collapse-header {
-    background-color: aquamarine;
+.in-progress {
+    animation: blinker 1s linear infinite;
+    box-shadow: 5px 10px 5px #1f1e1e;
+}
+@keyframes blinker {
+  50% {
+    opacity: 0.8;
+  }
 }
