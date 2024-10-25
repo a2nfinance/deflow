@@ -1,8 +1,17 @@
 import mongoose from 'mongoose';
 let Schema = mongoose.Schema;
-
+export const RunStates = {
+    CREATED: "created",
+    PROCESSING: "processing",
+    FAILED: "failed",
+    FINISHED: "finished",
+}
 let run = new Schema({
     owner: {
+        type: String,
+        require: true
+    },
+    name: {
         type: String,
         require: true
     },
@@ -29,7 +38,7 @@ let run = new Schema({
     state: {
         type: String,
         require: true,
-        default: "processing" // processing, failed, finished
+        default: RunStates.CREATED
     },
     created_at: {
         type: Date,

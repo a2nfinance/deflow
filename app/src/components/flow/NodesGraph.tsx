@@ -19,6 +19,7 @@ import { useCallback, useRef, useState } from 'react';
 import { InputNodeForm } from "./InputNodeForm";
 import { MiddleAndOutputForm } from "./MiddleAndOutputForm";
 import { useDB } from "@/hooks/useDB";
+import { useConnectWallet } from "@web3-onboard/react";
 
 const initialXY = 0;
 
@@ -47,6 +48,7 @@ export const NodesGraph = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState(initialNodes[0]);
   const {createExperimentAndRun} = useDB();
+  const [{wallet}] = useConnectWallet();
   const addNewNode = useCallback((type: number) => {
     let nodeType = "";
     if (type === 2) nodeType = "input";
@@ -134,9 +136,7 @@ export const NodesGraph = () => {
     //   });
     //   return [...edges]
     // })
-    console.log(nodes);
-    let orders = getTopologicalOrdering(edges);
-    console.log(orders);
+ 
     setSelectedNode(object);
   }, [edges, nodes, selectedNode]);
 
@@ -176,7 +176,7 @@ export const NodesGraph = () => {
   const handleSubmitExperimentAndRun = useCallback((values) =>{
     let orders = getTopologicalOrdering(edges);
     createExperimentAndRun({
-        owner: "0x7b2eb7cEA81Ea3E257dEEAefBE6B0F6A1b411042",
+        owner: wallet?.accounts[0].address,
         name: values["name"],
         description: values["description"],
         nodes: nodes,
@@ -258,7 +258,7 @@ export const NodesGraph = () => {
               <Form.Item label={"Description"} name={"description"}>
                 <Input size="large" />
               </Form.Item>
-              <Button size="large" htmlType="submit" type="primary" block>Save & Start new run</Button>
+              <Button size="large" htmlType="submit" type="primary" block>Save</Button>
             </Form>
           </Card>
           <Divider />

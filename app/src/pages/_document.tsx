@@ -4,15 +4,15 @@ export default function Document() {
     return (
         <Html lang='en'>
             <Head>
-                <meta name="title" content="Gamma Flow" />
-                <meta name="description" content="Gamma Flow"/>
+                <meta name="title" content="DeFlow" />
+                <meta name="description" content="Computation graph on decentralized ocean nodes"/>
                 <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-                <title>GammaFlow - Tools for experimenting and testing AI models on the Theta Cloud</title>
+                <title>DeFlow - computation graph on decentralized ocean nodes</title>
                 <link
                     rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css"
                 />
-                <meta property="og:url" content="https://gammaflow.a2n.finance/"></meta>
+                <meta property="og:url" content="https://deflow.a2n.finance/"></meta>
             </Head>
             <body>
                 <Main />

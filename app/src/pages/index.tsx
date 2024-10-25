@@ -1,9 +1,7 @@
+import { ExperimentList } from "@/components/experiment/List";
 
 export default function Index() {
-    // const {initializeCompute, getComputeEnvironments} = useOcean();
     return (
-        <>
-           Welcome to DeFlow
-        </>
+        <ExperimentList />
     )
 }

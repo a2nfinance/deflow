@@ -34,7 +34,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "src/utils/testFindTopoOrder.js"  ],
   "exclude": [
     "node_modules"
   ]

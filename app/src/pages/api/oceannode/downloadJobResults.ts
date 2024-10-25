@@ -28,9 +28,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 downloadAndPublishQueue.add({
                     nodeUrl: nodeUrl, 
                     args: ["downloadJobResults", envIdAndJobId, index, path], 
-                    destinationNodeUrl: [destinationNodeUrl],
-                    outputFilename: outputFilename,
-                    jobId: savedJob._id
+                    jobId: savedJob._id,
+                    accountNumber: 1
                 })
                 res.status(200).send({success: true, jobId: savedJob._id});
             } catch (error) {

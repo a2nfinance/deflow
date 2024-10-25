@@ -29,15 +29,15 @@ export const onboardConfig = {
   ],
   chains: [
     {
-      id: "0x169",
-      token: "TFUEL",
+      id: "0x5AFF",
+      token: "TEST",
       rpcUrl:
-        process.env.NEXT_PUBLIC_RPC_THETA || "https://eth-rpc-api.thetatoken.org/rpc",
+        process.env.NEXT_PUBLIC_RPC || "https://testnet.sapphire.oasis.dev",
     },
   ],
   appMetadata: {
-    name: "GammaFlow",
+    name: "DeFlow",
     icon: "/icon.png",
-    description: "GammaFlow supports AI model training and deployment on Theta EdgeCloud nodes.",
+    description: "DeFlow supports computation graph excution on Ocean Nodes with C2DV2.",
   },
 };

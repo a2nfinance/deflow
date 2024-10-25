@@ -83,3 +83,4 @@ let graph = getGraph(edges);
 console.log("Graph:", graph);
 console.log("Orders:", getTopologicalOrdering(graph))
 console.log("Incoming edges node 2:", getIncomingEdges(graph, '2'));
+console.log("Outgoing edges node 1:", getOutgoingEdges(graph, '1'));

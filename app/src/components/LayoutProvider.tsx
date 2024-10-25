@@ -52,42 +52,29 @@ export const LayoutProvider = (props: Props) => {
                             label: "New experiment",
                             onClick: () => router.push("/experiment/new")
                         },
-                        { type: "divider" },
                         {
                             key: '4',
                             icon: <LuBrainCircuit />,
-                            label: "My models",
-                            onClick: () => router.push("/models/list")
-                        },
-                        {
-                            key: '6',
-                            icon: <GrDeploy />,
-                            label: "My Deployments",
-                            onClick: () => router.push("/deployments")
-                        },
-                        {
-                            key: '5',
-                            icon: <CiPlay1 />,
-                            label: "Playground",
-                            onClick: () => router.push("/playground")
+                            label: "Publish assets",
+                            onClick: () => router.push("/asset/publish")
                         },
                         { type: "divider" },
                         {
                             key: "7",
                             type: "group",
-                            label: !collapsed ? 'GammaFlow v1.0.0' : "",
+                            label: !collapsed ? 'DeFlow v1.0.0' : "",
                             children: [
                                 {
                                     key: '7.1',
                                     icon: <FaSuperscript />,
                                     label: 'Twitter',
-                                    onClick: () => window.open("https://twitter.com/GammaFlowA2N", "_blank")
+                                    onClick: () => window.open("https://twitter.com/DeFlowA2N", "_blank")
                                 },
                                 {
                                     key: '7.2',
                                     icon: <GithubOutlined />,
                                     label: 'Github',
-                                    onClick: () => window.open("https://github.com/a2nfinance/gammaflow", "_blank")
+                                    onClick: () => window.open("https://github.com/a2nfinance/deflow", "_blank")
                                 },
                             ]
                         },
@@ -132,7 +119,7 @@ export const LayoutProvider = (props: Props) => {
                 >
                     {props.children}
                 </Content>
-                <Footer style={{ textAlign: 'center', maxHeight: 50 }}>GammaFlow ©2024 Created by A2N Finance</Footer>
+                <Footer style={{ textAlign: 'center', maxHeight: 50 }}>DeFlow ©2024 Created by A2N Finance</Footer>
             </Layout>
 
         </Layout>
