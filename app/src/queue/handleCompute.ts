@@ -77,12 +77,15 @@ const createExecuteJob = async (node, run, accountNumber, datasets?: any[]) => {
     } else {
         datasetList = node.data.dataasset_id;
     }
-    startComputeQueue.add({
-        nodeUrl: node.data.ocean_node_address,
-        args: ["startCompute", datasetList, node.data.algorithm_id, node.data.compute_env_id],
-        jobId: savedJob._id,
-        accountNumber: accountNumber
-    })
+    startComputeQueue.add(
+        {
+            nodeUrl: node.data.ocean_node_address,
+            args: ["startCompute", datasetList, node.data.algorithm_id, node.data.compute_env_id],
+            jobId: savedJob._id,
+            accountNumber: accountNumber
+        }, 
+        { jobId: savedJob._id.toString() }
+    )
 
 }
 

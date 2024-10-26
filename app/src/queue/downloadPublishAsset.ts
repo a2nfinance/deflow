@@ -5,6 +5,7 @@ import fs from "fs";
 import { Octokit } from "octokit";
 import tar from 'tar-fs';
 import { downloadAndPublishQueue } from ".";
+import _ from "lodash";
 
 const downloadAndPushToGithub = async (nodeUrl, args, jobId, accountNumber) => {
     try {
@@ -32,7 +33,7 @@ const downloadAndPushToGithub = async (nodeUrl, args, jobId, accountNumber) => {
                         break;
                     }
                 }
-                
+
             }
             if (files.length === 0) {
                 console.log("Could not download result files!");
@@ -40,7 +41,7 @@ const downloadAndPushToGithub = async (nodeUrl, args, jobId, accountNumber) => {
             }
 
             let fileContent = fs.readFileSync(extractPath + "/outputs/" + files[0], { encoding: 'base64' });
-           
+
 
             // Need to change filename based on settings
             let pathParts = result.filePath.split("/");
@@ -64,16 +65,15 @@ const downloadAndPushToGithub = async (nodeUrl, args, jobId, accountNumber) => {
             let downloadUrl = uploadResult.data.content?.download_url!;
             let job = await Job.findById(jobId);
             if (job) {
-                job.result.computedJob  = {...job.result.computedJob, outputsURL: downloadUrl};
                 let updatedResult = {
-                    ...job.result, 
-                    computedJob: {...job.result.computedJob, outputsURL: downloadUrl}
+                    ...job.result,
+                    computedJob: { ...job.result.computedJob, outputsURL: downloadUrl }
                 };
                 await Job.findOneAndUpdate({ _id: jobId }, { result: updatedResult });
                 console.log("Downloaded the final result of computation process!")
             }
         }
-    } catch(e) {
+    } catch (e) {
         console.log(e);
     }
 }
@@ -96,6 +96,7 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
             await new Promise(resolve => setTimeout(resolve, 5000));
 
             let files = fs.readdirSync(extractPath + "/outputs");
+            console.log("Check disk files first time:", files);
             if (files.length === 0) {
                 for (let i = 0; i < 10; i++) {
                     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -104,14 +105,18 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
                         break;
                     }
                 }
-                
+
             }
-            if (files.length === 0) {
-                console.log("Could not download result files!");
-                return;
+
+            let fileContent = "";
+            try {
+                fileContent = fs.readFileSync(extractPath + "/outputs/" + files[0], { encoding: 'base64' });
+            } catch (e) {
+                console.log("Could not read file:", e);
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                fileContent = fs.readFileSync(extractPath + "/outputs/" + files[0], { encoding: 'base64' });
             }
-            let fileContent = fs.readFileSync(extractPath + "/outputs/" + files[0], { encoding: 'base64' });
-           
+
 
             // Need to change filename based on settings
             let pathParts = result.filePath.split("/");
@@ -140,15 +145,19 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
                 if (destinationNodeUrl) {
                     // Create a dataset here
                     let downloadUrl = uploadResult.data.content?.download_url!;
-                    let ddo = {
-                        ...simpleComputeDataset,
-                        metadata: {
-                            ...simpleComputeDataset.metadata,
-                            name: "Asset from Job " + args[1]
-                        },
+                    let ddo = _.cloneDeep(simpleComputeDataset);
+                    ddo.metadata = {
+                        ...ddo.metadata,
+                        name: "Asset from Job " + args[1]
+                    };
+
+                    if (JSON.stringify(ddo.services[0]) !== JSON.stringify(simpleComputeDataset.services[0])) {
+                        ddo.services[0] = simpleComputeDataset.services[0];
                     }
                     ddo.services[0].fileObject.url = downloadUrl;
-                    ddo.services[0].files.files[0].url = downloadUrl;
+                    if (ddo.services[0].files.files) {
+                        ddo.services[0].files.files[0].url = downloadUrl;
+                    }
                     ddo.services[0].serviceEndpoint = destinationNodeUrl;
                     let result = await start(destinationNodeUrl, ["publish", ddo, false], accountNumber);
                     console.log("Publish dataset:", result);
@@ -169,6 +178,7 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
                                         "X-TYPESENSE-API-KEY": "xyz"
                                     }
                                 });
+
                                 let res = await req.json();
                                 console.log("FOUND:", res.found);
                                 if (res.found) {
@@ -186,12 +196,15 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
                                             body: JSON.stringify(document)
                                         });
 
-                                        let patchRes = await patchReq.json(); 
+                                        let patchRes = await patchReq.json();
                                         console.log("Incorrect DDO is updated with service:", patchRes.services[0]);
                                     }
-                                    ddos.push({ nodeUrl: destinationNodeUrl, ddoId: ddoId, filePath:  downloadUrl});
+                                    ddos.push({ nodeUrl: destinationNodeUrl, ddoId: ddoId, filePath: downloadUrl });
                                     clearInterval(checkDBInterval);
                                 }
+
+
+
                             } catch (e) {
                                 clearInterval(checkDBInterval);
                                 console.log(e);
@@ -231,17 +244,20 @@ const createDownloadAndPublishJob = async (currentNode, oceanNodeJobId, run, out
         state: JOB_STATES.PROCESSING
     })
     let savedJob = await newJob.save();
-    downloadAndPublishQueue.add({
-        nodeUrl: currentNode.data.ocean_node_address,
-        args: [
-            "downloadJobResults",
-            oceanNodeJobId,
-            1,
-            null],
-        destinationNodeUrls: outgoingNodes.map(node => node.data.ocean_node_address),
-        jobId: savedJob._id,
-        accountNumber: accountNumber
-    })
+    downloadAndPublishQueue.add(
+        {
+            nodeUrl: currentNode.data.ocean_node_address,
+            args: [
+                "downloadJobResults",
+                oceanNodeJobId,
+                1,
+                null],
+            destinationNodeUrls: outgoingNodes.map(node => node.data.ocean_node_address),
+            jobId: savedJob._id,
+            accountNumber: accountNumber
+        },
+        { jobId: savedJob._id.toString() }
+    )
 }
 
 export {

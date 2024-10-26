@@ -20,7 +20,7 @@ assetQueue.process(async (job) => {
         console.log("Start Job");
         await connect({});
         // process here
-        let result = await start(nodeUrl, args, 0);
+        let result = await start(nodeUrl, args, 1);
 
         if (result.success) {
             let ddoId = result.assetId;
@@ -51,7 +51,7 @@ assetQueue.process(async (job) => {
                 }
 
             }, 10000)
-            start(nodeUrl, ["getDDO", ddoId + "/true"], 0);
+            start(nodeUrl, ["getDDO", ddoId + "/true"], 1);
         } else {
             let jobObj = await Job.findOneAndUpdate({ _id: jobId }, { state: JOB_STATES.FAILED, result: { message: result.message } });
             console.log("Failed to execute job:", jobObj)
