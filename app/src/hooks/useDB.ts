@@ -1,5 +1,5 @@
 import { Experiment, Run, setExperiment, setJobs, setList, setRun, setRuns } from "@/controller/experiment/experimentSlice";
-import { useAppDispatch } from "@/controller/hooks";
+import { useAppDispatch, useAppSelector } from "@/controller/hooks";
 import { actionNames, updateActionStatus } from "@/controller/process/processSlice";
 import { JOB_STATES } from "@/database/models/job";
 import { RunStates } from "@/database/models/run";
@@ -8,17 +8,38 @@ import { useConnectWallet } from "@web3-onboard/react";
 
 export const useDB = () => {
     const [{ wallet }] = useConnectWallet();
+    const { experiment, run } = useAppSelector(state => state.experiment);
     const dispatch = useAppDispatch();
-    const createExperimentAndRun = async (body: any) => {
-        console.log("Create experiment and run:", body)
-        await fetch("/api/database/createExperimentAndRun", {
-            method: "POST",
-            body: JSON.stringify(body),
-            headers: {
-                "Content-Type": "application/json",
-            }
-        })
+    const createExperiment = async (body: any) => {
+        if (wallet?.accounts[0].address) {
+            console.log("Create experiment:", body)
+            let req = await fetch("/api/database/experiment/save", {
+                method: "POST",
+                body: JSON.stringify(body),
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+            let res = await req.json();
+            return res;
+        }
     }
+
+    const updateExperiment = async (body: any) => {
+        if (wallet?.accounts[0].address && experiment._id) {
+            console.log("Update experiment:", body)
+            let req = await fetch("/api/database/experiment/update", {
+                method: "POST",
+                body: JSON.stringify({ ...body, _id: experiment._id }),
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+            let res = await req.json();
+            return res;
+        }
+    }
+
 
     const getExperimentsByCreator = async () => {
         if (wallet?.accounts[0].address) {
@@ -142,6 +163,8 @@ export const useDB = () => {
     }
     const getJobsByRunId = async (run_id: string) => {
         if (wallet?.accounts[0].address) {
+            let run = await getRunById(run_id);
+            
             let getRq = await fetch("/api/database/job/getByRunId", {
                 method: "POST",
                 body: JSON.stringify({ run_id: run_id, owner: wallet?.accounts[0].address }),
@@ -149,22 +172,19 @@ export const useDB = () => {
                     "Content-Type": "application/json",
                 }
             });
-
             let jobs = await getRq.json();
+            dispatch(setJobs(jobs));
+            if (run.state === RunStates.FINISHED || run.state === RunStates.FAILED) return;
             let isOneJobFail = oneOfJobFail(jobs)
             if (isOneJobFail) {
                 updateRunById(run_id, JOB_STATES.FAILED);
             } else {
-                let run = await getRunById(run_id);
-                if (run.state !== RunStates.FINISHED) {
-                    let isCompleted = checkCompleteWorkflow(jobs, 2 * run.nodes.length - 1);
-                    if (isCompleted) {
-                        updateRunById(run_id, JOB_STATES.FINISHED);
-                    }
+                let isCompleted = checkCompleteWorkflow(jobs, 2 * run.nodes.length - 1);
+                if (isCompleted) {
+                    updateRunById(run_id, JOB_STATES.FINISHED);
                 }
-
             }
-            dispatch(setJobs(jobs));
+         
 
         }
     }
@@ -173,17 +193,19 @@ export const useDB = () => {
         if (wallet?.accounts[0].address) {
             await fetch("/api/oceannode/startComputationGraph", {
                 method: "POST",
-                body: JSON.stringify({ runId: run_id}),
+                body: JSON.stringify({ runId: run_id }),
                 headers: {
                     "Content-Type": "application/json",
                 }
             });
             await updateRunById(run_id, JOB_STATES.PROCESSING);
+            dispatch(setRun({ ...run, state: RunStates.PROCESSING }));
         }
     }
 
     return {
-        createExperimentAndRun,
+        createExperiment,
+        updateExperiment,
         getExperimentsByCreator,
         searchRunsByExperimentId,
         getExperimentByCreatorAndId,

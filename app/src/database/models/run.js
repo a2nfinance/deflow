@@ -40,6 +40,14 @@ let run = new Schema({
         require: true,
         default: RunStates.CREATED
     },
+    time_started: {
+        type: Date,
+        required: false,
+    },
+    time_ended: {
+        type: Date,
+        required: false,
+    },
     created_at: {
         type: Date,
         required: true,

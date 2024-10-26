@@ -6,18 +6,9 @@ import {
 export const actionNames = {
     getExperimentsByCreatorAction: "getExperimentsByCreatorAction",
     searchRunByExperimentIDAction: "searchRunByExperimentIDAction",
-    getModelVersionsByNameAction: "getModelVersionsByNameAction",
     createExperimentAction: "createExperimentAction",
-    startTrainingAction: "startTrainingAction",
-    createRegisteredModelAction: "createRegisteredModelAction",
-    createModelVersionAction: "createModelVersionAction",
-    generateDockerFilesAction: "generateDockerFilesAction",
-    downloadDockerFilesAction: "downloadDockerFilesAction",
-    buildAndPushDockerFileActions: "buildAndPushDockerFileActions",
-    callInferenceServicesAction: "callInferenceServicesAction",
-    createDeploymentInfoAction: "createDeploymentInfoAction",
-    getFileContentAction: "getFileContentAction",
-    deleteRunAction: "deleteRunAction"
+    deleteRunAction: "deleteRunAction",
+    startComputeGraphAction: "startComputeGraphAction"
 }
 
 
@@ -26,20 +17,11 @@ type Processes = {
 }
 
 const initialState: Processes = {
-    startTrainingAction: false,
-    createExperimentAction: false,
-    createRegisteredModelAction: false,
-    createModelVersionAction: false,
-    generateDockerFilesAction: false,
-    downloadDockerFilesAction: false,
-    buildAndPushDockerFileActions: false,
-    callInferenceServicesAction: false,
-    createDeploymentInfoAction: false,
-    getFileContentAction: false,
     getExperimentsByCreatorAction: false,
     searchRunByExperimentIDAction: false,
-    getModelVersionsByNameAction: false,
-    deleteRunAction: false
+    createExperimentAction: false,
+    deleteRunAction: false,
+    startComputeGraphAction: false
 }
 
 export const processesSlice = createSlice({

@@ -21,7 +21,9 @@ export interface Run {
     edges: any[],
     result: any,
     state: string,
-    created_at: Date
+    created_at: Date,
+    time_started?: Date,
+    time_ended?: Date
 }
 
 export interface Job {

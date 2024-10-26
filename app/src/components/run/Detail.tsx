@@ -10,6 +10,8 @@ import { useCallback, useEffect } from "react";
 import { GraphNodes } from "../graph/Nodes";
 import { ComputeJobDesc } from "./ComputeJobDesc";
 import { PublisAssetJobDesc } from "./PublishAssetJobDesc";
+import { RunStates } from "@/database/models/run";
+import { ProcessingTimeComponent } from "../common/ProcessingTimeComponent";
 
 export const RunDetail = () => {
     const [{ wallet }] = useConnectWallet();
@@ -46,9 +48,9 @@ export const RunDetail = () => {
         <Card style={{ maxWidth: 1200, margin: '0 auto' }} >
             <Row gutter={12}>
                 <Col span={10}>
-                    <Card title={"Computation Flow"} extra={
+                    <Card title={"Computation Graph"} extra={
                         <Space>
-                            {!jobs.length && <Button type='primary' size="large" onClick={() => handleStartNow()}>Start now</Button>}
+                            {!jobs.length && <Button type='primary' size="large" loading={run.state === RunStates.PROCESSING} onClick={() => handleStartNow()}>Start now</Button>}
                             {!!jobs.length && <Button type='primary' size="large" disabled>Start now</Button>}
                         </Space>
 
@@ -56,15 +58,7 @@ export const RunDetail = () => {
                         <div style={{ height: '400px', color: "black" }}>
                             <ReactFlow
                                 nodes={run.nodes}
-                                // onNodesChange={onNodesChange}
                                 edges={run.edges}
-                                // onEdgesChange={onEdgesChange}
-                                // onConnect={onConnect}
-                                // onReconnect={onReconnect}
-                                // onReconnectStart={onReconnectStart}
-                                // onReconnectEnd={onReconnectEnd}
-                                // onNodesDelete={onNodesDelete}
-                                // onNodeClick={onNodeClick}
                                 fitView
                             >
                                 <Background />
@@ -77,7 +71,9 @@ export const RunDetail = () => {
                     <GraphNodes nodes={run.nodes} />
                 </Col>
                 <Col span={12}>
-                    <Card title={"Progress history"}>
+                    <Card title={"Progress history"} style={{minHeight: "505px"}} extra={
+                        <ProcessingTimeComponent run={run} />
+                    }>
 
                         {
                             jobs.map((job, index) => {

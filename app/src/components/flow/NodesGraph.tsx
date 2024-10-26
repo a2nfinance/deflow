@@ -15,11 +15,13 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Button, Card, Col, Divider, Form, Input, Row, Steps } from 'antd';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { InputNodeForm } from "./InputNodeForm";
 import { MiddleAndOutputForm } from "./MiddleAndOutputForm";
 import { useDB } from "@/hooks/useDB";
 import { useConnectWallet } from "@web3-onboard/react";
+import { Experiment } from "@/controller/experiment/experimentSlice";
+import { useRouter } from "next/router";
 
 const initialXY = 0;
 
@@ -42,13 +44,14 @@ const initialEdges = [
   { id: '1-2', source: '1', target: '2' },
 ];
 
-export const NodesGraph = () => {
+export const NodesGraph = ({ existEdges, existNodes, name, description }: { existEdges?: any[], existNodes?: any[], name?: string, description?: string }) => {
+  const router = useRouter();
   const edgeReconnectSuccessful = useRef(true);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [selectedNode, setSelectedNode] = useState(initialNodes[0]);
-  const {createExperimentAndRun} = useDB();
-  const [{wallet}] = useConnectWallet();
+  const [nodes, setNodes, onNodesChange] = useNodesState(existNodes ?? initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(existEdges ?? initialEdges);
+  const [selectedNode, setSelectedNode] = useState(existNodes ? existNodes[0] : initialNodes[0]);
+  const { createExperiment, updateExperiment } = useDB();
+  const [{ wallet }] = useConnectWallet();
   const addNewNode = useCallback((type: number) => {
     let nodeType = "";
     if (type === 2) nodeType = "input";
@@ -117,26 +120,6 @@ export const NodesGraph = () => {
   );
 
   const onNodeClick = useCallback((_, object) => {
-    // setEdges((edges) => {
-    //   edges.forEach((el) => {
-    //     if (object.id === el.source) {
-    //       //@ts-ignore
-    //       el.animated = true;
-    //       //@ts-ignore
-    //       el.selected = true;
-    //       console.log("Set true:", el);
-
-    //     } else {
-    //       //@ts-ignore
-    //       el.animated = false;
-    //       //@ts-ignore
-    //       el.selected = false;
-    //       console.log("Set false:", el);
-    //     }
-    //   });
-    //   return [...edges]
-    // })
- 
     setSelectedNode(object);
   }, [edges, nodes, selectedNode]);
 
@@ -144,15 +127,14 @@ export const NodesGraph = () => {
     //@ts-ignore
     selectedNode.data.ocean_node_address = values[`ocean_node_address_${selectedNode.id}`]
     selectedNode.data.label = values[`label_${selectedNode.id}`]
-    // if (values["ddo_ids"]) {
     //@ts-ignore
     selectedNode.data.algorithm_id = values[`algorithm_id_${selectedNode.id}`];
     if (selectedNode.type === "input") {
       //@ts-ignore
       selectedNode.data.dataasset_id = values[`dataasset_id_${selectedNode.id}`];
-    } 
-   
-     //@ts-ignore
+    }
+
+    //@ts-ignore
     selectedNode.data.compute_env_id = values[`compute_env_${selectedNode.id}`];
 
     // }
@@ -173,17 +155,23 @@ export const NodesGraph = () => {
       }
   }
 
-  const handleSubmitExperimentAndRun = useCallback((values) =>{
+  const handleSubmitExperiment = useCallback((values) => {
     let orders = getTopologicalOrdering(edges);
-    createExperimentAndRun({
-        owner: wallet?.accounts[0].address,
-        name: values["name"],
-        description: values["description"],
-        nodes: nodes,
-        edges: edges,
-        orders: orders
-    })
-  }, [edges, nodes])
+    const body = {
+      owner: wallet?.accounts[0].address,
+      name: values["name"],
+      description: values["description"],
+      nodes: nodes,
+      edges: edges,
+      orders: orders
+    }
+    if (name && description) {
+      updateExperiment(body).then(() => router.push("/"));
+    } else {
+      createExperiment(body).then(() => router.push("/"));
+    }
+   
+  }, [edges, nodes, name, description])
 
 
   const ordersComponent = (edgesArr, nodeArr) => {
@@ -203,71 +191,74 @@ export const NodesGraph = () => {
 
     return items;
   }
-
-
   return (
     <div style={{ width: "100%" }}>
-      <Card title={"Execution Order"} size="small">
+      <Card title={"Execution Orders"} size="small">
 
         <Steps
           direction="horizontal"
-          current={1}
           items={ordersComponent(edges, nodes)}
         />
 
       </Card>
       <Divider />
-      <Row gutter={6}>
-        <Col span={18}>
-          <div style={{ height: '100vh', color: "black" }}>
-            <ReactFlow
-              nodes={nodes}
-              onNodesChange={onNodesChange}
-              edges={edges}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              onReconnect={onReconnect}
-              onReconnectStart={onReconnectStart}
-              onReconnectEnd={onReconnectEnd}
-              onNodesDelete={onNodesDelete}
-              onNodeClick={onNodeClick}
-              fitView
-            >
-              <Background />
-              <Controls position="top-left">
-                <ControlButton name="New Node" title="Middle Node" onClick={() => addNewNode(1)}>
-                  <AppstoreAddOutlined />
-                </ControlButton>
-                <ControlButton name="New Node" title="Input Node" onClick={() => addNewNode(2)}>
-                  <PlusCircleFilled />
-                </ControlButton>
-                <ControlButton name="New Node" title="Output Node" onClick={() => addNewNode(3)}>
-                  <PlusCircleOutlined />
-                </ControlButton>
-              </Controls>
-            </ReactFlow>
-          </div>
+      <Row gutter={12}>
+        <Col span={16}>
+          <Card title="Computation Graph">
+            <div style={{ height: 915, color: "black" }}>
+              <ReactFlow
+                nodes={nodes}
+                onNodesChange={onNodesChange}
+                edges={edges}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onReconnect={onReconnect}
+                onReconnectStart={onReconnectStart}
+                onReconnectEnd={onReconnectEnd}
+                onNodesDelete={onNodesDelete}
+                onNodeClick={onNodeClick}
+                fitView
+              >
+                <Background />
+                <Controls position="top-left">
+                  <ControlButton name="New Node" title="Middle Node" onClick={() => addNewNode(1)}>
+                    <AppstoreAddOutlined />
+                  </ControlButton>
+                  <ControlButton name="New Node" title="Input Node" onClick={() => addNewNode(2)}>
+                    <PlusCircleFilled />
+                  </ControlButton>
+                  <ControlButton name="New Node" title="Output Node" onClick={() => addNewNode(3)}>
+                    <PlusCircleOutlined />
+                  </ControlButton>
+                </Controls>
+              </ReactFlow>
+            </div>
+          </Card>
+
         </Col>
 
-        <Col span={6}>
-          <Card title="Experiment settings" size="small">
-            <Form layout="vertical" onFinish={handleSubmitExperimentAndRun}>
-              <Form.Item label={"Name"} name={"name"}>
+        <Col span={8}>
+          <Card title="Experiment settings">
+            <Form layout="vertical" onFinish={handleSubmitExperiment} initialValues={{
+              name: name,
+              description: description
+            }}>
+              <Form.Item label={"Name"} name={"name"} rules={[{required: true, message: "Name is missing"}]}>
                 <Input size="large" />
               </Form.Item>
-              <Form.Item label={"Description"} name={"description"}>
+              <Form.Item label={"Description"} name={"description"} rules={[{required: true, message: "Description is missing"}]}>
                 <Input size="large" />
               </Form.Item>
               <Button size="large" htmlType="submit" type="primary" block>Save</Button>
             </Form>
           </Card>
           <Divider />
-          <Card title={selectedNode.data.label} size="small">
+          <Card title={selectedNode.data.label}>
 
-            {
-              nodeFormComponent(selectedNode)
-            }
-          </Card>
+              {
+                nodeFormComponent(selectedNode)
+              }
+            </Card>
         </Col>
       </Row >
 
