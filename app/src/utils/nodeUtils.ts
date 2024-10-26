@@ -10,3 +10,11 @@ export const removeMeasuredField = (nodes: any[]) => {
 
     return removedMeasuredNodes;
 }
+
+export const getShortId = (envID: string) => {
+    return (
+        envID.slice(0, 10).concat("....").concat(
+            envID.slice(envID.length - 15, envID.length)
+        )
+    )
+};

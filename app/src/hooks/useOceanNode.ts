@@ -1,3 +1,4 @@
+import { getShortId } from "@/utils/nodeUtils";
 import { URL } from "url";
 const chainId = process.env.NEXT_PUBLIC_CHAIN_ID!;
 export const useOceanNode = () => {
@@ -13,7 +14,7 @@ export const useOceanNode = () => {
         let computeEnvsReq = await fetch(`${nodeUrl}/api/services/computeEnvironments?chainId=${chainId}`);
         let computeEnvsRes = await computeEnvsReq.json();
         let computeEnvs = computeEnvsRes[chainId].map((env) => {
-            return { label: env.id, value: env.id }
+            return { label: getShortId(env.id), value: env.id}
         });
 
         return computeEnvs;

@@ -12,6 +12,7 @@ import { ComputeJobDesc } from "./ComputeJobDesc";
 import { PublisAssetJobDesc } from "./PublishAssetJobDesc";
 import { RunStates } from "@/database/models/run";
 import { ProcessingTimeComponent } from "../common/ProcessingTimeComponent";
+import { headStyle } from "@/theme/layout";
 
 export const RunDetail = () => {
     const [{ wallet }] = useConnectWallet();
@@ -58,7 +59,7 @@ export const RunDetail = () => {
                     <Card title={"Computation Graph"} extra={
                         <Space>
                             {!jobs.length && <Button type='primary' size="large" loading={run.state === RunStates.PROCESSING} onClick={() => handleStartNow()}>Start now</Button>}
-                            {!!jobs.length && run.state !== JOB_STATES.FAILED && <Button type='primary' size="large" disabled>Start now</Button>}
+                            {!!jobs.length && run.state !== JOB_STATES.FAILED && <Button type='default' size="large" disabled>Start now</Button>}
                             {!!jobs.length && run.state === JOB_STATES.FAILED && <Button type='primary' size="large" loading={run.state === RunStates.PROCESSING} onClick={() => handleRemoveAndStart()}>Remove Failed Jobs and Start</Button>}
                         </Space>
 
@@ -81,7 +82,7 @@ export const RunDetail = () => {
                 <Col span={12}>
                     <Card title={"Progress history"} style={{ minHeight: "505px" }} extra={
                         <ProcessingTimeComponent run={run} />
-                    }>
+                    } headStyle={headStyle}>
 
                         {
                             jobs.map((job, index) => {

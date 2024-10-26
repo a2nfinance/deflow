@@ -201,7 +201,6 @@ export async function createAsset(
 			chainId,
 			macOsProviderUrl || providerUrl
 		);
-		console.log("Validate DDO:", ddo.services[0]);
 		const validateResult = await aquariusInstance.validate(ddo);
 		metadataHash = validateResult.hash;
 		flags = 2

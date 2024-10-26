@@ -296,7 +296,7 @@ export class Commands {
 		);
 
 		const mytime = new Date();
-		const computeMinutes = 15;
+		const computeMinutes = 120;
 		mytime.setMinutes(mytime.getMinutes() + computeMinutes);
 		
 		const computeValidUntil = Math.floor(mytime.getTime() / 1000);

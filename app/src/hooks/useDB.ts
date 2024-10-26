@@ -203,6 +203,19 @@ export const useDB = () => {
         }
     }
 
+    const removeFailJobsAndStart = async (run_id) => {
+        if (wallet?.accounts[0].address) {
+            await fetch("/api/database/job/deleteFailJobByRunId", {
+                method: "POST",
+                body: JSON.stringify({ run_id: run_id, owner: wallet?.accounts[0].address }),
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            });
+            await startComputeGraph(run_id);
+        }
+    }
+
     return {
         createExperiment,
         updateExperiment,
@@ -213,6 +226,7 @@ export const useDB = () => {
         deleteRunById,
         getRunById,
         getJobsByRunId,
-        startComputeGraph
+        startComputeGraph,
+        removeFailJobsAndStart
     }
 }
