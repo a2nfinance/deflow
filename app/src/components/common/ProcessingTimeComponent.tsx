@@ -7,8 +7,11 @@ const calculateSpentTime = (run: Run) => {
     if (run.state !== RunStates.CREATED && run._id && run.time_started) {
         console.log("RUN:", run);
         let toTime = run.time_ended ? new Date(run.time_ended!).getTime() : new Date().getTime();
-        const diffTime = toTime - new Date(run.time_started!).getTime();
-        console.log("Diff Time:", diffTime);
+        let diffTime = toTime - new Date(run.time_started!).getTime();
+        if (diffTime < 0) {
+            diffTime = new Date().getTime() - new Date(run.time_started!).getTime();
+        }
+        console.log(diffTime);
         const duration = diffTime/1000;
         const hours = Math.floor(duration / 3600);
         const minutes = Math.floor((duration % 3600) / 60);
@@ -27,7 +30,7 @@ export const ProcessingTimeComponent = ({run}: {run: Run}) => {
             timer = setInterval(() => setTimeSpent(calculateSpentTime(run))
             , 1000);
         }
-        if (run.time_ended) {
+        if (run.time_ended && run.time_ended > run.time_started!) {
             setTimeSpent(calculateSpentTime(run))
             clearInterval(timer);
         }

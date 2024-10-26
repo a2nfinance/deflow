@@ -17,7 +17,7 @@ export const RunDetail = () => {
     const [{ wallet }] = useConnectWallet();
     const router = useRouter();
     const { run, jobs } = useAppSelector(state => state.experiment);
-    const { getRunById, getJobsByRunId, startComputeGraph } = useDB();
+    const { getRunById, getJobsByRunId, startComputeGraph, removeFailJobsAndStart } = useDB();
 
 
 
@@ -44,6 +44,13 @@ export const RunDetail = () => {
         }
     }, [router.query?.id])
 
+
+    const handleRemoveAndStart = useCallback(() => {
+        if (router.query?.id) {
+            removeFailJobsAndStart(router.query?.id.toString());
+        }
+    }, [router.query?.id])
+
     return (
         <Card style={{ maxWidth: 1200, margin: '0 auto' }} >
             <Row gutter={12}>
@@ -51,7 +58,8 @@ export const RunDetail = () => {
                     <Card title={"Computation Graph"} extra={
                         <Space>
                             {!jobs.length && <Button type='primary' size="large" loading={run.state === RunStates.PROCESSING} onClick={() => handleStartNow()}>Start now</Button>}
-                            {!!jobs.length && <Button type='primary' size="large" disabled>Start now</Button>}
+                            {!!jobs.length && run.state !== JOB_STATES.FAILED && <Button type='primary' size="large" disabled>Start now</Button>}
+                            {!!jobs.length && run.state === JOB_STATES.FAILED && <Button type='primary' size="large" loading={run.state === RunStates.PROCESSING} onClick={() => handleRemoveAndStart()}>Remove Failed Jobs and Start</Button>}
                         </Space>
 
                     }>
@@ -71,7 +79,7 @@ export const RunDetail = () => {
                     <GraphNodes nodes={run.nodes} />
                 </Col>
                 <Col span={12}>
-                    <Card title={"Progress history"} style={{minHeight: "505px"}} extra={
+                    <Card title={"Progress history"} style={{ minHeight: "505px" }} extra={
                         <ProcessingTimeComponent run={run} />
                     }>
 
@@ -83,7 +91,7 @@ export const RunDetail = () => {
                                 } else if (job.job_type === JOB_TYPES.PUBLISH_COMPUTE) {
                                     if (job.state === JOB_STATES.FINISHED && node?.type === "output") {
                                         return <>
-                                            <Card title={"Computation graph has been executed successful!"}>
+                                            <Card key={`result-${index}`} title={"Computation graph has been executed successful!"}>
                                                 <Button type={"primary"} size="large" block onClick={() => window.open(job?.result?.computedJob?.outputsURL, "_blank")}>Download the Final Result Here</Button>
                                             </Card>
                                             <Divider />

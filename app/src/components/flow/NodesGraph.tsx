@@ -124,20 +124,19 @@ export const NodesGraph = ({ existEdges, existNodes, name, description }: { exis
   }, [edges, nodes, selectedNode]);
 
   const onFinish = useCallback((values: FormData) => {
-    //@ts-ignore
-    selectedNode.data.ocean_node_address = values[`ocean_node_address_${selectedNode.id}`]
-    selectedNode.data.label = values[`label_${selectedNode.id}`]
-    //@ts-ignore
-    selectedNode.data.algorithm_id = values[`algorithm_id_${selectedNode.id}`];
+    let updateObject = {
+      ocean_node_address:  values[`ocean_node_address_${selectedNode.id}`],
+      label: values[`label_${selectedNode.id}`],
+      algorithm_id: values[`algorithm_id_${selectedNode.id}`],
+      compute_env_id: values[`compute_env_${selectedNode.id}`]
+    }
     if (selectedNode.type === "input") {
       //@ts-ignore
-      selectedNode.data.dataasset_id = values[`dataasset_id_${selectedNode.id}`];
+      updateObject = {...updateObject, dataasset_id: values[`dataasset_id_${selectedNode.id}`]};
     }
 
-    //@ts-ignore
-    selectedNode.data.compute_env_id = values[`compute_env_${selectedNode.id}`];
+    selectedNode.data = {...selectedNode.data, ...updateObject};
 
-    // }
     setNodes(nodes => nodes.map((node, index) => {
       if (node.id === selectedNode.id) {
         return selectedNode;
@@ -157,6 +156,8 @@ export const NodesGraph = ({ existEdges, existNodes, name, description }: { exis
 
   const handleSubmitExperiment = useCallback((values) => {
     let orders = getTopologicalOrdering(edges);
+    console.log("Nodes:", nodes);
+    console.log("edges:", edges);
     const body = {
       owner: wallet?.accounts[0].address,
       name: values["name"],
