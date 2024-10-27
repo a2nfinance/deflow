@@ -11,34 +11,43 @@ export const useOceanNode = () => {
         return false;
     }
     const getComputeEnvs = async (nodeUrl: string) => {
-        let computeEnvsReq = await fetch(`${nodeUrl}/api/services/computeEnvironments?chainId=${chainId}`);
-        let computeEnvsRes = await computeEnvsReq.json();
-        let computeEnvs = computeEnvsRes[chainId].map((env) => {
-            return { label: getShortId(env.id), value: env.id}
-        });
+        try {
+            let envsReq = await fetch(`/api/oceannode/getNodeComputeEnvs`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ nodeUrl: nodeUrl })
+            });
 
-        return computeEnvs;
+            let envsRes = await envsReq.json();
+            if (envsRes.success) {
+                return envsRes.computeEnvs;
+            }
+        } catch(e) {
+            console.log(e);
+        }
+
+        return [];
 
     };
 
     const getDDOs = async (url: URL) => {
         try {
             let typesenseUrl = `${url.protocol}//${url.hostname}:8108`;
-            let ddosReq = await fetch(`${typesenseUrl}/collections/op_ddo_v4.1.0/documents/search?q=*&per_page=40&filter_by=chainId:=${chainId}`, {
-                method: "GET",
+            let ddosReq = await fetch(`/api/oceannode/getNodeDDOs`, {
+                method: "POST",
                 headers: {
-                    "X-TYPESENSE-API-KEY": "xyz"
-                }
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ typesenseUrl: typesenseUrl })
             });
-            let ddosRes: any = await ddosReq.json();
-            if (ddosRes.hits && ddosRes.hits.length) {
-                let algoAssets = ddosRes.hits.filter(hit => hit.document.metadata.type === "algorithm");
-                let dataAssets = ddosRes.hits.filter(hit => hit.document.metadata.type === "dataset");
-                let algos: { label: string, value: string }[] = algoAssets.map(hit => ({ label: hit.document.metadata.name, value: hit.document.id }));
-                let datasets: { label: string, value: string }[] = dataAssets.map(hit => ({ label: hit.document.metadata.name, value: hit.document.id }));
+            
+            let ddoRes = await ddosReq.json();
+            if (ddoRes.success) {
                 return {
-                    algos,
-                    datasets
+                    algos: ddoRes.algos,
+                    datasets: ddoRes.datasets
                 }
             }
 
