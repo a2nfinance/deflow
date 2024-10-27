@@ -26,9 +26,9 @@ export const ComputeJobDesc = ({ job, node }) => {
                 <Descriptions.Item label={"Asset File"}>
                     <Space>
                         {
-                            job.result?.computedJob?.assets?.map(asset => {
+                            job.result?.computedJob?.assets?.map((asset, index) => {
 
-                                return <Button icon={<LinkOutlined />} onClick={() => window.open(asset.fileObject.url, "_blank")}></Button>
+                                return <Button key={`asset-${index}`} icon={<LinkOutlined />} onClick={() => window.open(asset.fileObject.url, "_blank")}></Button>
                             })
                         }
                         

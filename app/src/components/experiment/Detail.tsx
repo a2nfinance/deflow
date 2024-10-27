@@ -17,7 +17,7 @@ export const Detail = () => {
         }
     }, [router.query?.id]);
 
-    
+
     return (
         <Card style={{ maxWidth: 1200, margin: '0 auto' }}>
 
@@ -46,10 +46,10 @@ export const Detail = () => {
                             <Descriptions.Item label="Execution Orders">
                                 <Flex justify='center' align='center'>
                                     {
-                                        experiment.orders.map(order => {
+                                        experiment.orders.map((order, index) => {
                                             let nodes = experiment.nodes.filter(node => order.indexOf(node.id) !== -1);
-                                            return <Tag> {nodes.map(node => {
-                                                return <div>
+                                            return <Tag key={`tag-order-${index}`}> {nodes.map((node, idx) => {
+                                                return <div key={`tag-order-div-${index}-${idx}`}>
                                                     {node.data.label}
                                                 </div>
                                             })

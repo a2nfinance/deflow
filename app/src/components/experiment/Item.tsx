@@ -29,10 +29,10 @@ export const Item = ({ index, experiment }: { index: number, experiment: any }) 
         <Descriptions.Item label="Layers in the compute execution order">
           <Flex justify='center' align='center'>
             {
-              experiment.orders.map(order => {
+              experiment.orders.map((order, index) => {
                 let nodes = experiment.nodes.filter(node => order.indexOf(node.id) !== -1);
-                return <Tag> {nodes.map(node => {
-                  return <div>
+                return <Tag key={`tag-order-${index}`}> {nodes.map((node, idx) => {
+                  return <div key={`tag-order-div-${index}-${idx}`}>
                     {node.data.label}
                   </div>
                 })
