@@ -12,17 +12,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         } = req.body;
         if (owner && _id && state) {
             try {
+                let currentRun = await Run.findById(_id);
+                if (!currentRun || currentRun.state === RunStates.FINISHED) return res.json({ success: false });
                 let updateObject: any = {
                     state: state
                 };
                 if (state === RunStates.PROCESSING) {
-                    updateObject = {...updateObject, time_started: new Date()}
+                    if (currentRun.state === RunStates.CREATED) {
+                        updateObject = {...updateObject, time_started: new Date()}
+                    } else if (currentRun.state === RunStates.FAILED) {
+                        updateObject = {...updateObject, time_ended: null};
+                    }
                 } 
                 if (state === RunStates.FAILED || state === RunStates.FINISHED) {
                     updateObject = {...updateObject, time_ended: new Date()}
                 }
                 await Run.findOneAndUpdate({ owner: owner, _id: _id}, updateObject);
-                res.json({ success: true });
+                return res.json({ success: true });
             } catch (error) {
                 console.log(error)
                 return res.status(500).send(error.message);
