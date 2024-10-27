@@ -4,37 +4,33 @@ import { Button } from "antd";
 import { useEffect, useState } from "react";
 
 const calculateSpentTime = (run: Run) => {
-    if (run.state !== RunStates.CREATED && run._id && run.time_started) {
-        console.log("RUN:", run);
-        let toTime = run.time_ended ? new Date(run.time_ended!).getTime() : new Date().getTime();
-        let diffTime = toTime - new Date(run.time_started!).getTime();
-        if (diffTime < 0) {
-            diffTime = new Date().getTime() - new Date(run.time_started!).getTime();
-        }
-        console.log(diffTime);
-        const duration = diffTime/1000;
-        const hours = Math.floor(duration / 3600);
-        const minutes = Math.floor((duration % 3600) / 60);
-        const seconds = Math.floor(duration % 60); 
-        return `${hours}h ${minutes}m ${seconds}s`
+    let diffTime = 0;
+    let toTime = new Date().getTime();
+    if (run.state === RunStates.PROCESSING) {
+        diffTime = toTime - new Date(run.time_started!).getTime();
+
+    } else if (run.state === RunStates.FAILED || RunStates.FINISHED) {
+        toTime = new Date(run.time_ended!).getTime();
+        diffTime = toTime - new Date(run.time_started!).getTime(); ;
     } else {
-         return `0h 0m 0s`
+        return `0h 0m 0s`
     }
-   
+    const duration = diffTime / 1000;
+    const hours = Math.floor(duration / 3600);
+    const minutes = Math.floor((duration % 3600) / 60);
+    const seconds = Math.floor(duration % 60);
+    return `${hours}h ${minutes}m ${seconds}s`
+
 }
-export const ProcessingTimeComponent = ({run}: {run: Run}) => {
+export const ProcessingTimeComponent = ({ run }: { run: Run }) => {
     const [timeSpent, setTimeSpent] = useState(`0h 0m 0s`);
-    useEffect(()=>{
+    useEffect(() => {
         let timer;
-        if (run.time_started && !run.time_ended) {
+        if (run.time_started) {
             timer = setInterval(() => setTimeSpent(calculateSpentTime(run))
-            , 1000);
-        }
-        if (run.time_ended && run.time_ended > run.time_started!) {
-            setTimeSpent(calculateSpentTime(run))
-            clearInterval(timer);
+                , 1000);
         }
         return () => clearInterval(timer);
     }, [run.time_started, run.time_ended])
-    return <Button type="primary"  size="large">Exectution time: {timeSpent}</Button>
+    return <Button type="primary" size="large">Exectution time: {timeSpent}</Button>
 }
