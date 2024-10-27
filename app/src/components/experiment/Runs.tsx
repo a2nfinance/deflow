@@ -93,7 +93,7 @@ export const Runs = () => {
                 onFinish={onFinishSearchForm}
                 initialValues={{
                     "time_created": 0,
-                    "state": 1,
+                    "state": "created",
                     "sort_by": 1
 
                 }}>

@@ -24,7 +24,7 @@ export const useOceanNode = () => {
     const getDDOs = async (url: URL) => {
         try {
             let typesenseUrl = `${url.protocol}//${url.hostname}:8108`;
-            let ddosReq = await fetch(`${typesenseUrl}/collections/op_ddo_v4.1.0/documents/search?q=*&filter_by=chainId:=${chainId}`, {
+            let ddosReq = await fetch(`${typesenseUrl}/collections/op_ddo_v4.1.0/documents/search?q=*&per_page=40&filter_by=chainId:=${chainId}`, {
                 method: "GET",
                 headers: {
                     "X-TYPESENSE-API-KEY": "xyz"

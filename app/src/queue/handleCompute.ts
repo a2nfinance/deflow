@@ -7,7 +7,8 @@ import { createDownloadAndPublishJob, downloadAndPushToGithub } from "./download
 import { checkCompleteWorkflow, getAccountNumberForNodes, oneOfJobFail } from "./utils";
 const startCompute = async (nodeUrl, args, jobId, accountNumber) => {
     try {
-        console.log("Start compute job");
+        console.log("=================================================")
+        console.log("Start a compute job with ID:", jobId);
         await connect({});
         // process here
         let result = await start(nodeUrl, args, accountNumber);
@@ -18,7 +19,8 @@ const startCompute = async (nodeUrl, args, jobId, accountNumber) => {
             let typesenseUrl = `${url.protocol}//${url.hostname}:8108`;
             let checkDBInterval = setInterval(async function () {
                 try {
-                    console.log("Searching Database");
+                    console.log("=================================================")
+                    console.log("Searching typesense database for created Ocean Node job");
                     let req = await fetch(`${typesenseUrl}/collections/c2djobs/documents/search?q=*&filter_by=id:=${oceanNodeJobId}`, {
                         headers: {
                             "X-TYPESENSE-API-KEY": "xyz"
@@ -28,7 +30,7 @@ const startCompute = async (nodeUrl, args, jobId, accountNumber) => {
                     if (res.found) {
 
                         // Update DB here
-                        console.log("Found Ocean Node JOB with ID:", oceanNodeJobId);
+                        console.log("Found Ocean Node job with ID:", oceanNodeJobId);
                         let document = res.hits[0].document;
                         let oceanNodeJobStatus = document.status;
                         if (oceanNodeJobStatus === 70) {
@@ -128,17 +130,17 @@ const executeComputeGraph = async (run) => {
                 accountNumbers[lastJob.ocean_node_url!]
             )
             console.log("=======================================")
-            console.log("All steps in the computation graph have been executed successful!");
+            console.log("All steps in the computation graph have been executed successfully!");
             console.log("=======================================")
             clearInterval(doJobInterval);
         } else {
-            console.log("=======================================")
-            console.log("Orders for compute execution:", orders);
+            console.log("==========================================================================")
+            console.log("Layers in the compute execution order:", orders);
             for (let i = 0; i < orders.length - 1; i++) {
-                console.log("Checking Jobs for all node in layer:", i);
+                console.log("== Checking jobs for all nodes in the layer:", i);
                 let statuses = orders[i].map(() => false);
                 for (let j = 0; j < orders[i].length; j++) {
-                    console.log("Checking Jobs for Node id:", orders[i][j]);
+                    console.log("---- Checking jobs for node ID:", orders[i][j]);
                     let currentNode = nodes.filter(node => orders[i][j] === node.id)[0];
                     let graphNodeId = orders[i][j];
                     let jobsForNode = jobs.filter(jb => jb.graph_node_id === graphNodeId);
@@ -146,29 +148,28 @@ const executeComputeGraph = async (run) => {
                         // Second job: Start download and publish DDO job here
                         // New Job
                         let outgoingEdges = getOutgoingEdges(graph, graphNodeId);
-                        console.log("========outgoingEdges:", outgoingEdges);
-
                         let outgoingNodeIDs = outgoingEdges.map(e => e[1]);
                         let outgoingNodes = nodes.filter(node => outgoingNodeIDs.indexOf(node.id) !== -1);
-                        console.log("========outgoingNodes:", outgoingNodes);
                         // Download and Publish to git here
                         let accountNumber = accountNumbers[currentNode.data.ocean_node_address];
-                        console.log("Create second Job to download and publish asset:", currentNode.data.label);
+                        console.log("---- Create second job to download and publish dataasset:", currentNode.data.label);
                         createDownloadAndPublishJob(currentNode, jobsForNode[0].result.oceanNodeJobId, run, outgoingNodes, accountNumber);
                     }
 
                     if (jobsForNode.length === 2) {
                         let finishedStates = jobsForNode.filter(jfn => jfn.state === JOB_STATES.FINISHED);
                         if (finishedStates.length === 2) {
-                            console.log("All jobs have been completed for node:", graphNodeId);
+                            console.log("---- All jobs have been completed for node ID:", graphNodeId);
                             statuses[j] = true;
+                        } else {
+                            console.log("---- More jobs needs to be executed on node ID:", graphNodeId);
                         }
                     }
                 }
-                console.log("All previous jobs have been completed or not >:", statuses);
+                console.log("---- Have all previous jobs been completed? >", statuses);
                 if (statuses.indexOf(false) === -1) {
                     let nextLayerInOrder = orders[i + 1];
-                    console.log("Checking next layer in compute execution orders:", nextLayerInOrder);
+                    console.log("== Checking the next layer in the compute execution order:", nextLayerInOrder);
                     for (let k = 0; k < nextLayerInOrder.length; k++) {
                         let currentNode = nodes.filter(node => nextLayerInOrder[k] === node.id)[0];
                         let graphNodeId = nextLayerInOrder[k];

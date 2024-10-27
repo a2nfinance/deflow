@@ -96,7 +96,6 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
             await new Promise(resolve => setTimeout(resolve, 5000));
 
             let files = fs.readdirSync(extractPath + "/outputs");
-            console.log("Check disk files first time:", files);
             if (files.length === 0) {
                 for (let i = 0; i < 10; i++) {
                     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -138,7 +137,7 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
             })
             let ddos: { nodeUrl: string, ddoId: string, filePath: string }[] = [];
             console.log("=========================================")
-            console.log("Publish dataset to:", destinationNodeUrls);
+            console.log("Publishing datasets to:", destinationNodeUrls);
             console.log("=========================================")
             for (let i = 0; i < destinationNodeUrls.length; i++) {
                 let destinationNodeUrl = destinationNodeUrls[i];
@@ -160,7 +159,8 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
                     }
                     ddo.services[0].serviceEndpoint = destinationNodeUrl;
                     let result = await start(destinationNodeUrl, ["publish", ddo, false], accountNumber);
-                    console.log("Publish dataset:", result);
+                    console.log("=================================================")
+                    console.log("Publishing dataset:", result);
                     // request check DDO with force true here
                     if (result.success) {
                         let ddoId = result.assetId;
@@ -171,7 +171,8 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
                         let typesenseUrl = `${url.protocol}//${url.hostname}:8108`;
                         let checkDBInterval = setInterval(async function () {
                             try {
-                                console.log("Searching Database");
+                                console.log("=================================================")
+                                console.log("Searching typesense database for created DDO...");
                                 let req = await fetch(`${typesenseUrl}/collections/op_ddo_v4.1.0/documents/search?q=*&filter_by=id:=${ddoId}`, {
                                     method: "GET",
                                     headers: {
@@ -180,10 +181,9 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
                                 });
 
                                 let res = await req.json();
-                                console.log("FOUND:", res.found);
                                 if (res.found) {
                                     // Update DB here
-                                    console.log("Found DDO with ID:", ddoId);
+                                    console.log("Found created DDO with ID:", ddoId);
                                     // Validate DDO here. If DDO has incorrect fileobject, it need to update.
                                     let document = res.hits[0].document;
                                     if (document.services[0].fileObject.url !== downloadUrl) {
@@ -197,7 +197,7 @@ const downloadAndPublish = async (nodeUrl, args, destinationNodeUrls, jobId, acc
                                         });
 
                                         let patchRes = await patchReq.json();
-                                        console.log("Incorrect DDO is updated with service:", patchRes.services[0]);
+                                        console.log("Incorrect DDO is updated with services info:", patchRes.services[0]);
                                     }
                                     ddos.push({ nodeUrl: destinationNodeUrl, ddoId: ddoId, filePath: downloadUrl });
                                     clearInterval(checkDBInterval);
