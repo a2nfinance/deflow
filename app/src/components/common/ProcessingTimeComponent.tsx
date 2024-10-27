@@ -32,5 +32,5 @@ export const ProcessingTimeComponent = ({ run }: { run: Run }) => {
         }
         return () => clearInterval(timer);
     }, [run.time_started, run.time_ended])
-    return <Button type="primary" size="large">Exectution time: {timeSpent}</Button>
+    return <Button type="primary" size="large">Execution time: {timeSpent}</Button>
 }

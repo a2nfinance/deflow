@@ -22,6 +22,7 @@ import { useDB } from "@/hooks/useDB";
 import { useConnectWallet } from "@web3-onboard/react";
 import { Experiment } from "@/controller/experiment/experimentSlice";
 import { useRouter } from "next/router";
+import { headStyle } from "@/theme/layout";
 
 const initialXY = 0;
 
@@ -184,8 +185,8 @@ export const NodesGraph = ({ existEdges, existNodes, name, description }: { exis
 
       });
       return {
-        title: `Group ${index}`,
-        description: `Nodes: ${nodeLabels}`
+        title: `Layer ${index}`,
+        description: `${nodeLabels.join(", ")}`
       }
 
     })
@@ -194,7 +195,7 @@ export const NodesGraph = ({ existEdges, existNodes, name, description }: { exis
   }
   return (
     <div style={{ width: "100%" }}>
-      <Card title={"Execution Orders"} size="small">
+      <Card size="small">
 
         <Steps
           direction="horizontal"
@@ -205,7 +206,7 @@ export const NodesGraph = ({ existEdges, existNodes, name, description }: { exis
       <Divider />
       <Row gutter={12}>
         <Col span={16}>
-          <Card title="Computation Graph">
+          <Card title="Computation graph">
             <div style={{ height: 915, color: "black" }}>
               <ReactFlow
                 nodes={nodes}
@@ -250,7 +251,7 @@ export const NodesGraph = ({ existEdges, existNodes, name, description }: { exis
               <Form.Item label={"Description"} name={"description"} rules={[{required: true, message: "Description is missing"}]}>
                 <Input size="large" />
               </Form.Item>
-              <Button size="large" htmlType="submit" type="primary" block>Save</Button>
+              <Button size="large" htmlType="submit" type="primary" block>Save computation graph information</Button>
             </Form>
           </Card>
           <Divider />

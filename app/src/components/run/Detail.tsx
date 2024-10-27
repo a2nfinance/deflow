@@ -92,8 +92,8 @@ export const RunDetail = () => {
                                 } else if (job.job_type === JOB_TYPES.PUBLISH_COMPUTE) {
                                     if (job.state === JOB_STATES.FINISHED && node?.type === "output") {
                                         return <>
-                                            <Card key={`result-${index}`} title={"Computation graph has been executed successful!"}>
-                                                <Button type={"primary"} size="large" block onClick={() => window.open(job?.result?.computedJob?.outputsURL, "_blank")}>Download the Final Result Here</Button>
+                                            <Card key={`result-${index}`} title={"The computation graph has been executed successfully!"}>
+                                                <Button type={"primary"} size="large" block onClick={() => window.open(job?.result?.computedJob?.outputsURL, "_blank")}>Download the final result here</Button>
                                             </Card>
                                             <Divider />
                                             <ComputeJobDesc key={`start-compute-${index}`} node={node} job={job} />

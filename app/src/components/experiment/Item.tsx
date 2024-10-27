@@ -26,7 +26,7 @@ export const Item = ({ index, experiment }: { index: number, experiment: any }) 
       </Descriptions>
       <Divider />
       <Descriptions layout='vertical' column={1}>
-        <Descriptions.Item label="Execution Orders">
+        <Descriptions.Item label="Layers in the compute execution order">
           <Flex justify='center' align='center'>
             {
               experiment.orders.map(order => {

@@ -47,7 +47,7 @@ export const InputNodeForm = ({ onFinish, node }: { onFinish: (values: any) => v
             <Select size="large" options={computeEnvs} />
         </Form.Item>
         <Form.Item>
-            <Button size="large" block type="primary" htmlType="submit">Update</Button>
+            <Button size="large" block type="primary" htmlType="submit">Update selected node</Button>
         </Form.Item>
     </Form>
 }

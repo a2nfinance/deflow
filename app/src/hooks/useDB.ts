@@ -42,7 +42,7 @@ export const useDB = () => {
 
 
     const getExperimentsByCreator = async () => {
-        if (wallet?.accounts[0].address) {
+        if (wallet?.accounts?.[0].address) {
             dispatch(updateActionStatus({ actionName: actionNames.getExperimentsByCreatorAction, value: true }))
             //get here
             let getReq = await fetch("/api/database/experiment/getList", {
@@ -56,6 +56,8 @@ export const useDB = () => {
             const experiments = await getReq.json();
             dispatch(setList(experiments));
             dispatch(updateActionStatus({ actionName: actionNames.getExperimentsByCreatorAction, value: false }))
+        } else {
+            dispatch(setList([]));
         }
     }
 
