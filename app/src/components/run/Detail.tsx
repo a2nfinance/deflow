@@ -79,7 +79,7 @@ export const RunDetail = () => {
                     <Divider />
                     <GraphNodes nodes={run.nodes} />
                 </Col>
-                <Col span={12}>
+                <Col span={14}>
                     <Card title={"Progress history"} style={{ minHeight: "505px" }} extra={
                         <ProcessingTimeComponent run={run} />
                     } headStyle={headStyle}>

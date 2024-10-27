@@ -113,8 +113,10 @@ export const Runs = () => {
                     <Col span={7}>
                         <Form.Item name={"state"}>
                             <Select size="large" options={[
-                                { label: "State: active", value: 1 },
-                                { label: "State: delete", value: 2 },
+                                { label: "State: created", value: "created" },
+                                { label: "State: processing", value: "processing" },
+                                { label: "State: finished", value: "finished" },
+                                { label: "State: failed", value: "failed" },
                             ]} />
                         </Form.Item>
                     </Col>

@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const LayoutProvider = (props: Props) => {
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(true);
     const router = useRouter();
     const {
         token: { colorBgContainer },
