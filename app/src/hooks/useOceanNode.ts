@@ -1,12 +1,16 @@
-import { getShortId } from "@/utils/nodeUtils";
 import { URL } from "url";
-const chainId = process.env.NEXT_PUBLIC_CHAIN_ID!;
 export const useOceanNode = () => {
     const checkCorrectNode = async (nodeUrl: string) => {
-        let req = await fetch(`${nodeUrl}`);
-        let res = await req.json();
-        if (res.chainIds.length && res.chainIds.indexOf(chainId) !== -1) {
-            return true;
+        let correctReq = await fetch(`/api/oceannode/checkCorrectComputeNode`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ nodeUrl: nodeUrl })
+        });
+        let correctRes = await correctReq.json();
+        if (correctRes.success) {
+            return correctRes.result;
         }
         return false;
     }
