@@ -56,7 +56,7 @@ export const LayoutProvider = (props: Props) => {
                             key: '4',
                             icon: <LuBrainCircuit />,
                             label: "Publish assets",
-                            onClick: () => router.push("/asset/publish")
+                            onClick: () => router.push("/assets/publish")
                         },
                         { type: "divider" },
                         {

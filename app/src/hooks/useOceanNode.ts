@@ -1,5 +1,7 @@
+import { useConnectWallet } from "@web3-onboard/react";
 import { URL } from "url";
 export const useOceanNode = () => {
+    const [{ wallet }] = useConnectWallet();
     const checkCorrectNode = async (nodeUrl: string) => {
         let correctReq = await fetch(`/api/oceannode/checkCorrectComputeNode`, {
             method: "POST",
@@ -28,7 +30,7 @@ export const useOceanNode = () => {
             if (envsRes.success) {
                 return envsRes.computeEnvs;
             }
-        } catch(e) {
+        } catch (e) {
             console.log(e);
         }
 
@@ -46,7 +48,7 @@ export const useOceanNode = () => {
                 },
                 body: JSON.stringify({ typesenseUrl: typesenseUrl })
             });
-            
+
             let ddoRes = await ddosReq.json();
             if (ddoRes.success) {
                 return {
@@ -64,5 +66,45 @@ export const useOceanNode = () => {
         }
     }
 
-    return { checkCorrectNode, getComputeEnvs, getDDOs };
+    const publishAlgoAsset = async (values: FormData) => {
+        try {
+            if (wallet?.accounts[0].address) {
+                let req = await fetch("/api/oceannode/publishAlgoAsset", {
+                    method: "POST",
+                    body: JSON.stringify({ ...values, owner: wallet?.accounts[0].address }),
+                    headers: {
+                        "Content-Type": "application/json",
+                    }
+                })
+                let res = await req.json();
+                return res;
+            }
+        } catch (e) {
+            console.log(e);
+        }
+
+        return { success: false, message: "Could not publish algorithm" }
+    }
+
+    const publishDataAsset = async (values: FormData) => {
+        try {
+            if (wallet?.accounts[0].address) {
+                let req = await fetch("/api/oceannode/publishDataAsset", {
+                    method: "POST",
+                    body: JSON.stringify({ ...values, owner: wallet?.accounts[0].address }),
+                    headers: {
+                        "Content-Type": "application/json",
+                    }
+                })
+                let res = await req.json();
+                return res;
+            }
+        } catch (e) {
+            console.log(e);
+        }
+
+        return { success: false, message: "Could not publish dataset" }
+    }
+
+    return { checkCorrectNode, getComputeEnvs, getDDOs, publishDataAsset, publishAlgoAsset };
 };
