@@ -95,7 +95,7 @@ const executeComputeGraph = async (run) => {
     const { nodes, edges, orders } = run;
     let graph = getGraph(edges);
     const accountNumbers = getAccountNumberForNodes(nodes);
-    const numberOfActions = 2 * nodes.length - 1;
+    const numberOfActions = nodes.length + graph.length;
     // Init all first jobs for Input node here
     let jobs = await Job.find({ run_id: run._id });
     let firstNodes = nodes.filter(node => orders[0].indexOf(node.id) !== -1);
