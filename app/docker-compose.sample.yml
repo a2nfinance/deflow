@@ -1,0 +1,87 @@
+services:
+  ocean-node:
+    image: a2nfinance/ocean_node:c2d_docker_0.1.0
+    pull_policy: always
+    container_name: ocean-node
+    restart: on-failure
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+      - "9001:9001"
+      - "9002:9002"
+      - "9003:9003"
+    environment:
+      PRIVATE_KEY: 'generated private key here'
+      RPCS: '{"23295":{"rpc":"https://testnet.sapphire.oasis.io","chainId":23295,"network":"sapphire-testnet","chunkSize":100}}'
+      DB_URL: 'http://typesense:8108/?apiKey=xyz'
+      DB_TYPE: 'typesense'
+      IPFS_GATEWAY: 'https://ipfs.io/'
+      ARWEAVE_GATEWAY: 'https://arweave.net/'
+      DOCKER_COMPUTE_ENVIRONMENTS: '[{"cpuNumber":1,"cpuType":"","gpuNumber":0,"ramGB":1,"diskGB":1,"priceMin":0,"desc":"The compute time limit for the job is 300 seconds (Free).","currentJobs":0,"maxJobs":1,"consumerAddress":"","storageExpiry":900,"maxJobDuration":300,"feeToken":"0x0000000000000000000000000000000000000000","free":true},{"cpuNumber":1,"cpuType":"","gpuNumber":0,"ramGB":1,"diskGB":1,"priceMin":0,"desc":"The compute time limit for the job is 1000 seconds (Paid).","currentJobs":0,"maxJobs":1,"consumerAddress":"","storageExpiry":2000,"maxJobDuration":1000,"feeToken":"0x973e69303259B0c2543a38665122b773D28405fB","free":false}]'
+#      LOAD_INITIAL_DDOS: ''
+      # FEE_TOKENS: '0x973e69303259B0c2543a38665122b773D28405fB'
+      # FEE_AMOUNT: '1000'
+#      ADDRESS_FILE: ''
+#      NODE_ENV: ''
+#      AUTHORIZED_DECRYPTERS: ''
+#      OPERATOR_SERVICE_URL: ''
+      INTERFACES: '["HTTP","P2P"]'
+#      ALLOWED_VALIDATORS: ''
+#      INDEXER_NETWORKS: '[]'
+      ALLOWED_ADMINS: '["0x7b2eb7cEA81Ea3E257dEEAefBE6B0F6A1b411042"]'
+#      INDEXER_INTERVAL: ''
+      DASHBOARD: 'true'
+#      RATE_DENY_LIST: ''
+#      MAX_REQ_PER_SECOND: ''
+#      MAX_CHECKSUM_LENGTH: ''
+#      LOG_LEVEL: ''
+      HTTP_API_PORT: '8000'
+      P2P_ENABLE_IPV4: 'true'
+      P2P_ENABLE_IPV6: 'false'
+      P2P_ipV4BindAddress: '0.0.0.0'
+      P2P_ipV4BindTcpPort: '9000'
+      P2P_ipV4BindWsPort: '9001'
+      P2P_ipV6BindAddress: '::'
+      P2P_ipV6BindTcpPort: '9002'
+      P2P_ipV6BindWsPort: '9003'
+#     Change this address to your ocean node IP address.
+      P2P_ANNOUNCE_ADDRESSES: '["/ip4/127.0.0.1/tcp/9000", "/ip4/127.0.0.1/ws/tcp/9001"]'
+      DOCKER_HOST: "127.0.0.1"
+      DOCKER_PORT: "2375"
+      DOCKER_PROTOCOL: "http"
+#      P2P_ANNOUNCE_PRIVATE: ''
+#      P2P_pubsubPeerDiscoveryInterval: ''
+#      P2P_dhtMaxInboundStreams: ''
+#      P2P_dhtMaxOutboundStreams: ''
+#      P2P_mDNSInterval: ''
+#      P2P_connectionsMaxParallelDials: ''
+#      P2P_connectionsDialTimeout: ''
+#      P2P_ENABLE_UPNP: ''
+#      P2P_ENABLE_AUTONAT: ''
+#      P2P_ENABLE_CIRCUIT_RELAY_SERVER: ''
+#      P2P_ENABLE_CIRCUIT_RELAY_CLIENT: ''
+#      P2P_BOOTSTRAP_NODES: '["/dns4/node3.oceanprotocol.com/tcp/9000/p2p/"]'
+#      P2P_FILTER_ANNOUNCED_ADDRESSES: ''
+    networks:
+      - ocean_network
+    depends_on:
+      - typesense
+
+  typesense:
+    image: typesense/typesense:26.0
+    container_name: typesense
+    ports:
+      - "8108:8108"
+    networks:
+      - ocean_network
+    volumes:
+      - typesense-data:/data
+    command: '--data-dir /data --api-key=xyz'
+
+volumes:
+  typesense-data:
+    driver: local
+
+networks:
+  ocean_network:
+    driver: bridge
