@@ -6,7 +6,11 @@ To become a comprehensive platform for users to execute data processing and AI m
 DeFlow is an application designed to streamline complex AI model training and data processing tasks within the Ocean Network ecosystem. It enables users to build and execute computation graphs visually, where each node represents a server (Ocean Node) and each edge signifies data flow between nodes. Users can set up, monitor, and automate complex workflows across multiple nodes seamlessly.
 
 ### 2. Demo information 
-
+- [Demo Video]()
+- [Demo App](https://deflow.a2n.finance)
+- [Github](https://github.com/a2nfinance/deflow/tree/main)
+- [Disease prediction source code (used in demo video)](https://github.com/a2nfinance/deflow-example/tree/main/disease_prediction)
+- [Custom Ocean Node docker image](https://hub.docker.com/repository/docker/a2nfinance/ocean_node/general)
 
 <details>
   <summary>
