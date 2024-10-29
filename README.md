@@ -4,13 +4,13 @@ DeFlow is an application designed to streamline complex AI model training and da
 For details about the architecture and how the computation graph functions within DeFlow, please visit [the hackathon details page.](https://dorahacks.io/buidl/18142)
 
 ### 2. Demo information 
-- [Demo Video]()
+- [Demo Video](https://www.youtube.com/watch?v=EBQzQ2Jyy1k)
 - [Demo App](https://deflow.a2n.finance)
 - [Github](https://github.com/a2nfinance/deflow/tree/main)
 - [Disease prediction source code (used in demo video)](https://github.com/a2nfinance/deflow-example/tree/main/disease_prediction)
 - [Custom Ocean Node docker image](https://hub.docker.com/repository/docker/a2nfinance/ocean_node/general)
 
-
+All Ocean Nodes in the demo video support the Oasis Sapphire Testnet.
 <details>
   <summary>
     <b> >>>Click here to see demo screenshots</b>
