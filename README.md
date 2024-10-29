@@ -38,16 +38,11 @@ For details about the architecture and how the computation graph functions withi
 - [DeFlow REST APIs for Publishing Assets and Starting Computations](https://github.com/a2nfinance/deflow/tree/main/app/src/pages/api/oceannode)
 - [Custom Code Modifications to Ocean CLI for Compatibility with Ocean Nodes in the C2DV2 Architecture](https://github.com/oceanprotocol/ocean-cli/compare/main...a2nfinance:ocean-cli:main)
 
-To start a Docker container for a custom Ocean Node, you can refer to [this sample file](/app/docker-compose.sample.yml). Please ensure that your file includes the following environment variables to avoid errors:
 
-- DB_URL
-- DB_TYPE
-- DOCKER_COMPUTE_ENVIRONMENTS
-- DOCKER_HOST
-- DOCKER_PORT
-- DOCKER_PROTOCOL
 
 ### 4. Installation
+
+#### 4.1 Frontend application
 You need to setup the .env file first.
 
 | Environment Variable | Required | Description |
@@ -77,6 +72,32 @@ Commands:
 - ```npm i```
 - ```npm run dev``` for developer mode
 - ```npm run build; npm run start``` for production mode
+
+
+#### 4.2 Ocean Nodes and C2D environments
+
+- [Install Docker Engine on a Remote Machine](https://docs.docker.com/engine/install/debian/)
+- [Enable the Docker Daemon](https://docs.docker.com/engine/daemon/)
+- [Set Up Ocean Nodes](https://github.com/oceanprotocol/ocean-node/blob/main/docs/dockerDeployment.md)
+
+> **Note:** This guide is not fully up to date, as it does not support some required variables. To start a Docker container for a custom Ocean Node, you can refer to [this sample file](/app/docker-compose.sample.yml). Ensure that your file includes the following environment variables to avoid errors:
+
+  - `DB_URL`
+  - `DB_TYPE`
+  - `DOCKER_COMPUTE_ENVIRONMENTS`
+  - `DOCKER_HOST`
+  - `DOCKER_PORT`
+  - `DOCKER_PROTOCOL`
+
+> Remember that your remote machine needs specific ports open. Please check your firewall configuration and make sure these ports are accessible: 8000, 9000, 9001, 9002, 9003, 8108 (optional), and 2375 (for Docker Engine with TCP).
+
+
+#### 4.3 Computation resources
+
+All input nodes in your computation graph require datasets, and all nodes require an algorithm. Therefore, you must publish assets before use.
+
+- [You can use the custom CLI.](https://github.com/a2nfinance/ocean-cli)
+- For a better UX, you can use the [DeFlow frontend tools](https://deflow.a2n.finance/assets/publish). However, this tool is not yet complete and is for testing purposes only. You will need to wait and manually verify that assets have been published successfully.
 
 
 
