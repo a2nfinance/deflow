@@ -30,7 +30,7 @@ export const MiddleAndOutputForm = ({ onFinish, node }: { onFinish: (values: any
     }
   }, [algos, computeEnvs])
   return <Form layout="vertical" onFinish={onFinish}>
-    <Form.Item name={`label_${node.id}`} label="Label" initialValue={node.data.label}>
+    <Form.Item name={`label_${node.id}`} label="Label" initialValue={node.data.label} rules={[{ required: true, message: "Label is missing" }]}>
       <Input size="large" placeholder="Label" />
     </Form.Item>
     <Form.Item name={`ocean_node_address_${node.id}`} initialValue={node.data.ocean_node_address} label="Ocean Node Address" rules={[{ required: true, message: "Ocean node is missing", type: "url" }]}>
@@ -39,7 +39,7 @@ export const MiddleAndOutputForm = ({ onFinish, node }: { onFinish: (values: any
     <Form.Item name={`algorithm_id_${node.id}`} initialValue={node.data.algorithm_id} label="Algorithm DDO ID" rules={[{ required: true, message: "Algorithm is missing" }]}>
       <Select size="large" options={algos} />
     </Form.Item>
-    <Form.Item name={`compute_env_${node.id}`} initialValue={node.data.compute_env_id} label="Compute ENV">
+    <Form.Item name={`compute_env_${node.id}`} initialValue={node.data.compute_env_id} label="Compute ENV" rules={[{ required: true, message: "ENV is missing" }]}>
       <Select size="large" options={computeEnvs} />
     </Form.Item>
     <Form.Item>
