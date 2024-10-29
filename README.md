@@ -1,4 +1,4 @@
-## Introduction
+## 1. Introduction
 DeFlow is an application designed to streamline complex AI model training and data processing tasks within the Ocean Network ecosystem. It enables users to build and execute computation graphs visually, where each node represents a server (Ocean Node) and each edge signifies data flow between nodes. Users can set up, monitor, and automate complex workflows across multiple nodes seamlessly.
 
 For details about the architecture and how the computation graph functions within DeFlow, please visit [the hackathon details page.](https://dorahacks.io/buidl/18142)
@@ -42,7 +42,7 @@ For details about the architecture and how the computation graph functions withi
 
 ### 4. Installation
 
-#### 4.1 Frontend application
+#### 4.1. Frontend application
 You need to setup the .env file first.
 
 | Environment Variable | Required | Description |
@@ -74,7 +74,7 @@ Commands:
 - ```npm run build; npm run start``` for production mode
 
 
-#### 4.2 Ocean Nodes and C2D environments
+#### 4.2. Ocean Nodes and C2D environments
 
 - [Install Docker Engine on a Remote Machine](https://docs.docker.com/engine/install/debian/)
 - [Enable the Docker Daemon](https://docs.docker.com/engine/daemon/)
@@ -92,13 +92,16 @@ Commands:
 > Remember that your remote machine needs specific ports open. Please check your firewall configuration and make sure these ports are accessible: 8000, 9000, 9001, 9002, 9003, 8108 (optional), and 2375 (for Docker Engine with TCP).
 
 
-#### 4.3 Computation resources
+#### 4.3. Computation resources
 
 All input nodes in your computation graph require datasets, and all nodes require an algorithm. Therefore, you must publish assets before use.
 
 - [You can use the custom CLI.](https://github.com/a2nfinance/ocean-cli)
 - For a better UX, you can use the [DeFlow frontend tools](https://deflow.a2n.finance/assets/publish). However, this tool is not yet complete and is for testing purposes only. You will need to wait and manually verify that assets have been published successfully.
 
+### 5. Technical support
+
+If you would like to contribute to this project or need technical support, please email our project representative at john@a2n.finance.
 
 
 
