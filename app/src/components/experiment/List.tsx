@@ -1,9 +1,10 @@
 import { useDB } from "@/hooks/useDB"
-import { List, Spin } from "antd"
+import { Alert, List, Spin } from "antd"
 import { useEffect } from "react"
 import { Item } from "./Item"
 import { useAppSelector } from "@/controller/hooks"
 import { useConnectWallet } from "@web3-onboard/react"
+import { NotConnectInfo } from "../common/NotConnectInfo"
 
 export const ExperimentList = () => {
     const [{ wallet }] = useConnectWallet();
@@ -15,13 +16,13 @@ export const ExperimentList = () => {
     }, [wallet?.accounts?.length])
     return (
         <Spin spinning={getExperimentsByCreatorAction}>
-            <List
+            { !!wallet?.accounts?.length? <List
                 grid={{
                     gutter: 12,
                     column: 3
                 }}
                 size="large"
-                pagination={{
+                pagination={{   
                     onChange: (page) => {
                         console.log(page);
                     },
@@ -32,7 +33,8 @@ export const ExperimentList = () => {
                 renderItem={(item, index) => (
                     <Item index={index} experiment={item} />
                 )}
-            />
+            /> : <NotConnectInfo />
+            }
         </Spin>
     )
 }
