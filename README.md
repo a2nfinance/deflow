@@ -72,7 +72,7 @@ You need to setup the .env file first.
 | GIT_FOLDER_PATH | ✅ | Folder path to store asset files. |
 | GIT_NAME | ✅ | GitHub username. |
 | GIT_EMAIL | ✅ | GitHub user email. |
-| PRIVATE_KEY_[I] | ✅ | Private keys are used for transaction payments; there should be as many keys as the number of Ocean Nodes being used. ROSE and TEST tokens will be used for payments. |
+| PRIVATE_KEY_[I] | ✅ | Private keys are used for transaction payments; there should be as many keys as the number of Ocean Nodes being used. TEST tokens will be used for payments. |
 
 Commands:
 

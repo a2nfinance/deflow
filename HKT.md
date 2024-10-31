@@ -12,7 +12,7 @@ DeFlow is an application designed to streamline complex AI model training and da
 - [Disease prediction source code (used in demo video)](https://github.com/a2nfinance/deflow-example/tree/main/disease_prediction)
 - [Custom Ocean Node docker image](https://hub.docker.com/repository/docker/a2nfinance/ocean_node/general)
 
-All Ocean Nodes in the demo video support both the Oasis Sapphire mainnet and testnet, with ROSE and TEST tokens used for necessary payments.
+All Ocean Nodes in the demo video support the Oasis Sapphire testnet, with TEST tokens used for required payments.
 <details>
   <summary>
     <b> >>>Click here to see demo screenshots</b>
