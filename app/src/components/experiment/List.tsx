@@ -16,7 +16,7 @@ export const ExperimentList = () => {
     }, [wallet?.accounts?.length])
     return (
         <Spin spinning={getExperimentsByCreatorAction}>
-            { !!wallet?.accounts?.length? <List
+            { !!wallet?.accounts?.length ? <List
                 grid={{
                     gutter: 12,
                     column: 3

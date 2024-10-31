@@ -31,12 +31,20 @@ All Ocean Nodes in the demo video support both the Oasis Sapphire mainnet and te
  </details>
 
 ### 3. Code Implementation Details
-- [Custom Ocean Node Commits](https://github.com/oceanprotocol/ocean-node/compare/feature/c2d_docker...a2nfinance:ocean-node:feature/c2d_docker)
+- [Custom Ocean Node Commits](https://github.com/oceanprotocol/ocean-node/compare/feature/c2d_docker...a2nfinance:ocean-node:feature/c2d_docker):
+
+  - **Fix bug related to algorithm path**: The current code uses `/data/transformation/algorithm`; the correct path is `/data/transformations/algorithm`.
+  - **Add Typesense database** for storing C2D jobs.
+  - **Add C2D environments** from `DOCKER_COMPUTE_ENVIRONMENTS` instead of hardcoding the free environment, allowing a maximum of 30 seconds per task.
+  - **Improve logs** for `compute_engine_dockers` and remove temporary database.
 - [Custom Ocean Node Docker Image](https://hub.docker.com/repository/docker/a2nfinance/ocean_node/general)
-- [Node Communication Component, Customized Based on Ocean CLI](https://github.com/a2nfinance/deflow/tree/main/app/src/oceancli)
-- [Bull Queue Implementation](https://github.com/a2nfinance/deflow/tree/main/app/src/queue)
+- [Node Communication Component, Customized Based on Ocean CLI](https://github.com/a2nfinance/deflow/tree/main/app/src/oceancli): 
+  - Customize Provider class to support the free compute endpoint.
+  - Modify commands to align with DeFlow REST APIs.
+- [Bull Queue Implementation](https://github.com/a2nfinance/deflow/tree/main/app/src/queue): Manages DeFlow jobs on the server side.
 - [DeFlow REST APIs for Publishing Assets and Starting Computations](https://github.com/a2nfinance/deflow/tree/main/app/src/pages/api/oceannode)
-- [Custom Code Modifications to Ocean CLI for Compatibility with Ocean Nodes in the C2DV2 Architecture](https://github.com/oceanprotocol/ocean-cli/compare/main...a2nfinance:ocean-cli:main)
+- [Custom Code Modifications to Ocean CLI for Compatibility with Ocean Nodes in the C2DV2 Architecture](https://github.com/oceanprotocol/ocean-cli/compare/main...a2nfinance:ocean-cli:main):
+Ocean Nodes and `compute_engine_docker` use `fileObject`, but this CLI does not support it. Additionally, the CLI does not support the free Docker engine compute environment, so we customized the source code.
 
 
 
@@ -64,7 +72,7 @@ You need to setup the .env file first.
 | GIT_FOLDER_PATH | ✅ | Folder path to store asset files. |
 | GIT_NAME | ✅ | GitHub username. |
 | GIT_EMAIL | ✅ | GitHub user email. |
-| PRIVATE_KEY_[I] | ✅ | Private keys used for transaction payments; should have as many keys as the number of Ocean Nodes being used. |
+| PRIVATE_KEY_[I] | ✅ | Private keys are used for transaction payments; there should be as many keys as the number of Ocean Nodes being used. ROSE and TEST tokens will be used for payments. |
 
 Commands:
 
